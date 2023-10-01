@@ -1,0 +1,39 @@
+[vermelho] {
+    color: red;
+}
+
+body {
+    background-color: #f1f1f1;
+    background-image: url("https://cdn.dribbble.com/users/134564/screenshots/4575057/kriptown-illu-animation403_clean.gif");
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    background-attachment: fixed;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+.container {
+    width: 75%;
+    min-width: 25%;
+    margin: 150px auto;
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+h1,
+h2 {
+    text-align: center;
+}
+
+p {
+    text-align: center;
+    margin-top: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
