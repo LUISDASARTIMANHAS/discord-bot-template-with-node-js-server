@@ -5,7 +5,7 @@ const express = require("express");
 const { token, descricao, prefix, lista } = config;
 const bot = new Client();
 const novaLinha = "\n";
-const types = ["PLAYING","WHATCHING", "STREAMING","LISTENING"]
+const types = ["PLAYING","WATCHING", "STREAMING","LISTENING"]
 
 bot.on("ready", async () => {
     const embedStatus = new Discord.MessageEmbed();
