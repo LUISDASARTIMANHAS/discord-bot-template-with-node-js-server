@@ -5,6 +5,7 @@ const express = require("express");
 const { token, descricao, prefix, lista } = config;
 const bot = new Client();
 const novaLinha = "\n";
+const types = ["PLAYING","WHATCHING", "STREAMING","LISTENING"]
 
 bot.on("ready", async () => {
     const embedStatus = new Discord.MessageEmbed();
@@ -15,28 +16,29 @@ bot.on("ready", async () => {
     const flag = "🇧🇷";
 
     let activities = [
-        `Utilize ${prefix}help para obter ajuda`,
-        descricao,
-        `${guildsCount} servidores!`,
-        descricao,
-        `${channelsCount} canais!`,
-        descricao,
-        `${usersCount} usuários!`,
-        descricao
-    ],
-        i = 0;
-    alterarStatus();
-    setInterval(alterarStatus, 60000);
+      `Utilize ${prefix}help para obter ajuda`,
+      descricao,
+      `${guildsCount} servidores!`,
+      descricao,
+      `${channelsCount} canais!`,
+      descricao,
+      `${usersCount} usuários!`,
+      descricao,
+    ]
+  alterarStatus();
+  setInterval(alterarStatus, 60000);
 
-    function alterarStatus() {
-        const activity = activities[i++ % activities.length];
-
-        bot.user.setPresence({
-            activity: { type: "WATCHING", name: activity },
-        });
-        console.log("STATUS DO DISCORD DO" + botTag);
-        console.log("Atividade do Status: " + activity);
-    }
+  function alterarStatus() {
+    const ramdomActivity = activities[Math.floor(Math.random() * activities.length)]
+    const ramdomType = types[Math.floor(Math.random() * types.length)]
+    
+    console.log()
+    bot.user.setPresence({
+      activity: { type: ramdomType, name: ramdomActivity },
+    });
+    console.log("STATUS DO DISCORD DO " + botTag);
+    console.log("Atividade do Status: " +ramdomType + ": " + ramdomActivity);
+  }
 
     console.log("Usuários:" + usersCount);
     console.log("Canais:" + channelsCount);
