@@ -34,8 +34,8 @@ bot.on("ready", async () => {
         bot.user.setPresence({
             activity: { type: "WATCHING", name: activity },
         });
-        console.log("STATUS DO DISCORD DO comons");
-        console.log("Atividade: " + activity);
+        console.log("STATUS DO DISCORD DO" + botTag);
+        console.log("Atividade do Status: " + activity);
     }
 
     console.log("Usuários:" + usersCount);
