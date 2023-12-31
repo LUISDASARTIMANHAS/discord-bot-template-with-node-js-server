@@ -25,7 +25,7 @@
     "xss": "^1.0.14"
   },
   "engines": {
-    "node": "14.x"
+    "node": "20.x"
   },
   "license": "MIT",
   "keywords": [
