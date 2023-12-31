@@ -56,6 +56,7 @@ const checkHeaderMiddleware = (req, res, next) => {
   }
 };
 
+// Middleware para controlar o número de solicitações
 const requestLimiter = (req, res, next) => {
   const clientIP = req.ip; 
 
