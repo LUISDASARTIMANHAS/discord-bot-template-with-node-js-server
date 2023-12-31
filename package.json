@@ -19,7 +19,7 @@
     "fetch-blob": "^4.0.0",
     "fs": "^0.0.2",
     "node-fetch": "^2.7.0",
-    "opusscript": "^0.0.8",
+    "opusscript": "^0.1.0",
     "path": "^0.12.7",
     "utf-8-validate": "^6.0.3",
     "xss": "^1.0.14"
