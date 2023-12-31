@@ -13,6 +13,12 @@ router.use(cors({ origin: "*" }));
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
+// Rota blackhole para lidar com muitas requisições
+router.use('/blackhole', (req, res) => {
+  res.status(429);
+  res.send('Too Many Requests // Muitas Solicitações!');
+});
+
 // Middleware para lidar com rotas não encontradas (404)
 router.use((req, res, next) => {
   res.status(404);
