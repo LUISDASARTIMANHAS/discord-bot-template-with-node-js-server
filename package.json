@@ -1,6 +1,6 @@
 {
   "name": "bothoster",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "main": "start.js",
   "author": "PINGOBRAS S.A",
   "dependencies": {
@@ -21,7 +21,8 @@
     "node-fetch": "^2.7.0",
     "opusscript": "^0.0.8",
     "path": "^0.12.7",
-    "utf-8-validate": "^6.0.3"
+    "utf-8-validate": "^6.0.3",
+    "xss": "^1.0.14"
   },
   "engines": {
     "node": "14.x"
