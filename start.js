@@ -1,4 +1,5 @@
 const express = require("express");
+const helmet = require('helmet');
 const xss = require("xss");
 const app = express();
 const path = require("path");
@@ -55,6 +56,15 @@ const checkHeaderMiddleware = (req, res, next) => {
     next();
   }
 };
+
+// Adicione o middleware Helmet para configurar o HSTS
+app.use(
+  helmet.hsts({
+    maxAge: 365 * 24 * 60 * 60,
+    includeSubDomains: true, // incluir subdomínios
+    preload: true, // habilitar preload (opcional)
+  })
+);
 
 // Middleware para controlar o número de solicitações
 const requestLimiter = (req, res, next) => {
