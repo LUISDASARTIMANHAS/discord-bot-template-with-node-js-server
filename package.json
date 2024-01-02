@@ -22,7 +22,8 @@
     "opusscript": "^0.1.0",
     "path": "^0.12.7",
     "utf-8-validate": "^6.0.3",
-    "xss": "^1.0.14"
+    "xss": "^1.0.14",
+    "helmet": "^7.1.0"
   },
   "engines": {
     "node": "20.x"
