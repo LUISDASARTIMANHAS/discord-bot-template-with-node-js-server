@@ -1,19 +1,18 @@
-const express = require("express");
-const helmet = require('helmet');
-const xss = require("xss");
+import express from "express";
 const app = express();
-const path = require("path");
-const fs = require("fs");
-const cors = require("cors");
+import path from "path";
+import fs from "fs";
+import cors from "cors";
 const port = 3000;
-const requestCount = {};
+import {fileURLToPath} from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const files = __dirname + "/src/";
 const path_pages = files + "pages/";
 const path_js = files + "js";
 const forbiddenFilePath = path.join(path_pages, "forbidden.html");
-const rotas = require("./rotas");
-const pages = require("./pages");
+import rotas from "./rotas.js";
+import pages from "./pages.js";
 // Configurar o CORS para permitir origens específicas
 const corsOptions = {
   origin: /^https:\/\/.+/,
@@ -28,79 +27,34 @@ const checkHeaderMiddleware = (req, res, next) => {
   ];
   const blockRoutesPresent = blockedRoutes.includes(req.path);
   const payload = JSON.stringify(req.body, null, 2);
-  const key = "key";
-  const key2 = "key2";
-  const key3 = "key&Aplication";
-
-  const validKey = keyHeader === key;
-  const validKey2 = keyHeader === key2;
-  const validKey3 = keyHeader === key3;
-  const auth1 = blockRoutesPresent && !validKey;
-  const auth2 = blockRoutesPresent && !validKey2;
-  const auth3 = blockRoutesPresent && !validKey3;
-  for (const key in req.body) {
-    req.body[key] = xss(req.body[key]);
-  }
+  const keys = [
+    "123456789",
+    "1020251461274"
+  ];
+  const validKey = keys.some((key) => keyHeader === key);
+  const auth = startRouteApi && !validKey;
 
   console.log("-------------------------");
   console.log("SISTEMA <CHECK> <OBTER>: " + req.url);
   console.log("SISTEMA <ORIGEM>: " + origin);
   console.log("SISTEMA <PAYLOAD>: " + payload);
-  if (auth1 && auth2 && auth3) {
+  keys.forEach(key => {
+    const auth = keyHeader === key;
+    print(keyHeader, key, auth);
+  });
+  if (auth) {
     // Se estiver solicitando das rotas bloqueadas E não conter key, bloquea a solicitação
-    print(keyHeader, key, key2, key3, auth1, auth2, auth3);
     forbidden(res);
   } else {
     // Cabeçalho "solicitador" presente ou rota não bloqueada, permite o acesso
-    print(keyHeader, key, key2, key3, auth1, auth2, auth3);
     next();
   }
 };
-
-// Adicione o middleware Helmet para configurar o HSTS
-app.use(
-  helmet.hsts({
-    maxAge: 365 * 24 * 60 * 60,
-    includeSubDomains: true, // incluir subdomínios
-    preload: true, // habilitar preload (opcional)
-  })
-);
-
-// Middleware para controlar o número de solicitações
-const requestLimiter = (req, res, next) => {
-  const clientIP = req.ip; 
-
-  // Verifica se o IP existe no objeto requestCount
-  if (!requestCount[clientIP]) {
-    requestCount[clientIP] = 1;
-  } else {
-    requestCount[clientIP]++;
-  }
-
-  // Define um limite de solicitações (por exemplo, 100 solicitações em um minuto)
-  const requestLimit = 50;
-  const timeLimit = 60000; // 1 minuto em milissegundos
-
-  // Se o número de solicitações do IP exceder o limite em um minuto
-  if (requestCount[clientIP] > requestLimit) {
-    console.log("Muitas Solicitações! do ip: " + clientIP);
-    return res.status(429).send('Too Many Requests // Muitas Solicitações!'); // Retorna um código de status 429 - Too Many Requests
-  }
-
-  // Configura o tempo limite para resetar o contador de solicitações
-  setTimeout(() => {
-    requestCount[clientIP] = 0; // Reinicia o contador para o IP após o tempo limite
-  }, timeLimit);
-
-  next();
-};
-
-app.use(requestLimiter);
 app.use(cors(corsOptions));
 app.use(checkHeaderMiddleware);
 app.use(pages);
 app.use(rotas);
-require("./index");
+import * as bot from "./src/index.js";
 
 
 app.listen(port, () => {
@@ -108,13 +62,9 @@ app.listen(port, () => {
 });
 
 // functions basicas
-function print(keyHeader, key, key2, key3, auth1, auth2, auth3) {
-  console.log("SISTEMA <VERIFICAÇÃO 1>: " + keyHeader + " == " + key);
-  console.log("SISTEMA <VERIFICAÇÃO 2>: " + keyHeader + " == " + key2);
-  console.log("SISTEMA <VERIFICAÇÃO 2>: " + keyHeader + " == " + key3);
-  console.log("SISTEMA <AUTORIZAÇÃO 1>: " + conversorSimEnao(!auth1));
-  console.log("SISTEMA <AUTORIZAÇÃO 2>: " + conversorSimEnao(!auth2));
-  console.log("SISTEMA <AUTORIZAÇÃO 3>: " + conversorSimEnao(!auth3));
+function print(keyHeader, key, auth1) {
+  console.log("SISTEMA <VERIFICAÇÃO>: " + keyHeader + " == " + key);
+  console.log("SISTEMA <AUTORIZAÇÃO>: " + conversorSimEnao(!auth1));
   console.log("----------------------------");
 }
 

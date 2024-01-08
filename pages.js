@@ -1,7 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const path = require("path");
+import path from "path";
+import {fileURLToPath} from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const files = __dirname + "/src/";
 const path_css = files + "css/";
 const path_js = files + "js/"
@@ -26,4 +28,4 @@ router.get("/debugger", (req, res) => {
   console.log("SISTEMA <OBTER> <SITE>: " + req.url);
   res.status(200)
 });
-module.exports = router;
+export default router;

@@ -1,30 +1,32 @@
 {
   "name": "bothoster",
-  "version": "1.0.5",
+  "version": "1.0.10",
   "main": "start.js",
   "author": "PINGOBRAS S.A",
   "dependencies": {
-    "@discordjs/opus": "^0.9.0",
-    "@popperjs/core": "^2.11.8",
+    "helmet": "^7.1.0",
+    "@discordjs/builders": "^1.7.0",
+    "@discordjs/rest": "^2.2.0",
     "@types/node-fetch": "^2.6.6",
     "bootstrap": "^5.3.2",
     "bufferutil": "^4.0.7",
     "cors": "^2.8.5",
     "detective-cjs": "^5.0.1",
-    "discord-api-types": "^0.37.58",
-    "discord.js": "^14.0.0",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
     "encoding": "^0.1.13",
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
     "fetch-blob": "^4.0.0",
     "fs": "^0.0.2",
     "node-fetch": "^3.0.0",
-    "opusscript": "^0.1.0",
+    "nodemon": "^3.0.2",
     "path": "^0.12.7",
+    "url": "^0.11.3",
     "utf-8-validate": "^6.0.3",
-    "xss": "^1.0.14",
-    "helmet": "^7.1.0"
+    "xss": "^1.0.14"
   },
+  "type": "module",
   "engines": {
     "node": "20.x"
   },
@@ -32,12 +34,13 @@
   "keywords": [
     "node",
     "glitch",
-    "express"
+    "express",
+    "discord"
   ],
   "scripts": {
     "start": "node start.js",
-    "install": "install.cmd"
+    "start:dev": "nodemon start.js",
+    "autoInstall": "npm install"
   },
-  "devDependencies": {},
-  "description": ""
+  "description": "Template de discord bot usando o node.js para criar site e hospedar bot com o js"
 }
