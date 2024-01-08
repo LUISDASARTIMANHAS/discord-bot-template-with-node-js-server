@@ -1,8 +1,8 @@
 import { config } from "dotenv";
 import { REST } from "@discordjs/rest";
 import { Activity, ActivityType, Client, GatewayIntentBits, Routes } from "discord.js";
-import pingCommand from "./commands/ping.js";
-import helpCommand from "./commands/help.js";
+import pingCommand from "./comandos/ping.js";
+import helpCommand from "./comandos/help.js";
 import fs from "fs";
 const rawData = fs.readFileSync("./data/config.json");
 const configs = JSON.parse(rawData);
