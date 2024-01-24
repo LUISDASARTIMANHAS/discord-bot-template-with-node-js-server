@@ -7,7 +7,7 @@
     {
       "description": "Whether to automerge branches/PRs automatically, without human intervention.",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "automergeComment": 
     {
