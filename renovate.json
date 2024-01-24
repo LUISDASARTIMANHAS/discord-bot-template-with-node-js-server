@@ -3,6 +3,8 @@
   "extends": [
     "config:base",
   ],
+},
+{  
   "prHeader": "ATUALIZAÇÃO-AUTOMÁTICA",
   "assignees": [
     "LUISDASARTIMANHAS"
