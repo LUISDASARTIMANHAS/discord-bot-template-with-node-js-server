@@ -3,17 +3,10 @@
   "extends": [
     "config:base",
   ],
-},
-{  
-  "prHeader": "ATUALIZAÇÃO-AUTOMÁTICA",
-  "assignees": [
-    "LUISDASARTIMANHAS"
-  ],
-  "labels": ["dependencies"],
-  "packageRules": [
-    {
-    "matchPackagePatterns": ["auto"], 
-    "labels": ["auto-system-rebovate"]
-    }
-]
+  {
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  }
+}
 }
