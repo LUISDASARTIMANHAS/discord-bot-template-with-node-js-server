@@ -14,5 +14,5 @@
       "description": "PR comment to add to trigger automerge. Only used if `automergeType=pr-comment`.",
       "type": "string",
       "default": "automergeComment"
-    },
+    }
 }
