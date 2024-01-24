@@ -3,10 +3,5 @@
   "extends": [
     "config:recommended",
   ],
-  "automerge": 
-    {
-      "description": "Whether to automerge branches/PRs automatically, without human intervention.",
-      "type": "boolean",
-      "default": true
-    }
+  "automerge": true
 }
