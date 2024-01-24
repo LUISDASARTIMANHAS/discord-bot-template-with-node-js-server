@@ -8,11 +8,5 @@
       "description": "Whether to automerge branches/PRs automatically, without human intervention.",
       "type": "boolean",
       "default": true
-    },
-    "automergeComment": 
-    {
-      "description": "PR comment to add to trigger automerge. Only used if `automergeType=pr-comment`.",
-      "type": "string",
-      "default": "automergeComment"
     }
 }
