@@ -1,9 +1,19 @@
 import express from "express";
+import ddos from "ddos";
 const app = express();
 import path from "path";
 import fs from "fs";
 import cors from "cors";
 const port = 3000;
+const params = {
+  limit: 150,
+  maxcount: 250,
+  trustProxy: true,
+  includeUserAgent: true,
+  whitelist: [],
+  testmode: false
+};
+const limiter = new ddos(params);
 import {fileURLToPath} from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -50,6 +60,7 @@ const checkHeaderMiddleware = (req, res, next) => {
     next();
   }
 };
+app.use(limiter.express);
 app.use(cors(corsOptions));
 app.use(checkHeaderMiddleware);
 app.use(pages);
