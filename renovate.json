@@ -5,7 +5,7 @@
   ],
   "packageRules": [
     {
-      "extends": ["monorepo:main"],
+      "extends": ["monorepo:ionic-native"],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
     }
