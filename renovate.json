@@ -1,11 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
+  "extends": [
     "config:recommended"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  }
+},
+{
   "packageRules": [
     {
-      "matchPackagePatterns": ["*"],
+      "extends": ["monorepo:ionic-native"],
+      "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
     }
   ]
