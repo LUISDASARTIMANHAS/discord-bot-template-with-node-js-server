@@ -1,33 +1,36 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 
-const helpCommand = new SlashCommandBuilder()
+let helpCommand = new SlashCommandBuilder()
     .setName('help')
     .setDescription('Usado para ver os comandos e informações')
 
-export default helpCommand.toJSON();
+helpCommand = helpCommand.toJSON();
 
-// const Discord = require("discord.js");
-// const embed = new Discord.MessageEmbed();
-// const {comandos, prefix} = require("../../data/config.json");
+// help.js
+function handleHelp(interaction) {
+    if (interaction.commandName === 'help') {
+        const novaLinha = "\n";
+        let info = "ℹ️__**prefixo:**__ " + prefix + novaLinha;
 
-// module.exports.run = async (bot, message, args) => {
-//   const novaLinha = "\n";
+        // Iterar sobre cada comando no JSON
+        comandos.forEach((comando) => {
+            info += "__**" + comando.title + "**__" +
+                novaLinha +
+                comando.description +
+                novaLinha
+        });
 
-//   let info = "ℹ️__**prefixo:**__ " + prefix + novaLinha;
+        const embed = new Discord.MessageEmbed();
+        embed.setTitle(`**__PAINEL DE AJUDA__**`);
+        embed.setColor("#FF00FF");
+        embed.setDescription(info);
+        embed.setTimestamp();
 
-//   // Iterar sobre cada comando no JSON
-//   comandos.forEach((comando) => {
-//     info += "__**"+comando.title+"**__" + 
-//      novaLinha +
-//     comando.description +
-//     novaLinha
-//   });
-  
-//   embed.setTitle(`**__PAINEL DE AJUDA__**`);
-//   embed.setColor("#FF00FF");
-//   embed.setDescription(info);
-//   embed.setTimestamp();
+        interaction.reply({ embeds: [embed] });
+    }
+}
 
-//   message.delete().catch((O_o) => {});
-//   message.channel.send(embed);
-// };
+export {
+    helpCommand,
+    handleHelp
+}

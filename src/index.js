@@ -1,8 +1,9 @@
 import { config } from "dotenv";
 import { REST } from "@discordjs/rest";
 import { Activity, ActivityType, Client, GatewayIntentBits, Routes } from "discord.js";
-import pingCommand from "./comandos/ping.js";
-import helpCommand from "./comandos/help.js";
+import { pingCommand, handlePing } from "./comandos/ping.js";
+import { helpCommand, handleHelp } from './comandos/help.js';
+import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
 import fs from "fs";
 const rawData = fs.readFileSync("./data/config.json");
 const configs = JSON.parse(rawData);
@@ -45,13 +46,14 @@ bot.on("ready", async () => {
 
   alterarStatus();
   setInterval(alterarStatus, 60000);
-
-  let embedStatus = {
-    title: "**__🖥️MENSAGEM DO SERVIDOR🖥️:__**",
-    description: info,
-    color: 16753920,
-  };
-  channelLogs.send({ embeds: [embedStatus] });
+	sendLogsEmbed(
+		channelLogs,
+		"**__🖥️MENSAGEM DO SERVIDOR🖥️:__**",
+		info,
+		16753920,
+		"",
+		""
+	);
 
   console.log("Usuários:" + usersCount);
   console.log("Canais:" + channelsCount);
@@ -96,38 +98,43 @@ bot.on("ready", async () => {
 });
 
 bot.on("interactionCreate", (interaction) => {
-  if ((interaction.isChatInputCommand()) && (interaction.commandName === 'pedido')) {
-        const comida = interaction.options.get('comidas').value
-        const bebida = interaction.options.get('bebidas').value
-        console.log(comida);
-        console.log(bebida);
-
-        interaction.reply({
-            content: "Seu pedido foi feito: " + comida + ", e para acompanhar: " + bebida
-        })
-    }
-  if (interaction.isCommand() && interaction.commandName === "sayembed") {
-    const titulo = interaction.options.getString("title");
-    const descricao = interaction.options.getString("description");
-    const color = parseInt(
-      interaction.options.getString("color").replace("#", ""),
-      16
-    ); // Converte a cor hexadecimal para um número inteiro
-    const channel = interaction.options.getChannel("channel");
-
-    const embed = {
-      title: titulo,
-      description: descricao,
-      color: color,
-    };
-
-    // Envia o embed diretamente para o canal fornecido
-    interaction.guild.channels.cache.get(channel.id).send({ embeds: [embed] });
-    interaction.reply({
-      content: `Embed enviado para o canal ${channel.name}!`,
-    });
-  }
+	handlePing(interaction);
+	handleHelp(interaction);
 });
+
+// bot.on("interactionCreate", (interaction) => {
+//   if ((interaction.isChatInputCommand()) && (interaction.commandName === 'pedido')) {
+//         const comida = interaction.options.get('comidas').value
+//         const bebida = interaction.options.get('bebidas').value
+//         console.log(comida);
+//         console.log(bebida);
+
+//         interaction.reply({
+//             content: "Seu pedido foi feito: " + comida + ", e para acompanhar: " + bebida
+//         })
+//     }
+//   if (interaction.isCommand() && interaction.commandName === "sayembed") {
+//     const titulo = interaction.options.getString("title");
+//     const descricao = interaction.options.getString("description");
+//     const color = parseInt(
+//       interaction.options.getString("color").replace("#", ""),
+//       16
+//     ); // Converte a cor hexadecimal para um número inteiro
+//     const channel = interaction.options.getChannel("channel");
+
+//     const embed = {
+//       title: titulo,
+//       description: descricao,
+//       color: color,
+//     };
+
+//     // Envia o embed diretamente para o canal fornecido
+//     interaction.guild.channels.cache.get(channel.id).send({ embeds: [embed] });
+//     interaction.reply({
+//       content: `Embed enviado para o canal ${channel.name}!`,
+//     });
+//   }
+// });
 
 async function main() {
   const commands = [
