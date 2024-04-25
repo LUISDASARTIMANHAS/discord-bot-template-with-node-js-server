@@ -5,9 +5,6 @@ updates:
     schedule:
       interval: "daily"  # ou "weekly", "monthly", etc.
     open-pull-requests-limit: 10  # número máximo de pull requests abertos
-    auto-merge:
-      dependency-approval: true  # mesclar automaticamente quando não houver aprovações necessárias
-      dependency-approval-count: 1  # número mínimo de aprovações necessárias
-      merge-commit-message: "Dependabot auto-merge"
-      merge-method: "merge"  # ou "squash", "rebase"
-      require-up-to-date: true  # exigir que o branch esteja atualizado antes da mesclagem
+    labels:
+      - "dependabot"  # opcional, para adicionar rótulos aos pull requests do Dependabot
+      - "dependecies"
