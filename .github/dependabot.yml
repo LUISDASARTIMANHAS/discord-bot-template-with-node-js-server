@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: "daily"  # ou "weekly", "monthly", etc.
     open-pull-requests-limit: 10  # número máximo de pull requests abertos
+    auto-merge:
+      merge-method: "merge"  # ou "squash", "rebase"
+      commit-message:
+        prefix: "Dependabot auto-merge"
     labels:
       - "dependabot"  # opcional, para adicionar rótulos aos pull requests do Dependabot
-      - "dependecies"
+      - "dependencies"
