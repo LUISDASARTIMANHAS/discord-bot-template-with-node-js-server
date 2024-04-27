@@ -1,14 +1,12 @@
 import { config } from "dotenv";
 import { REST } from "@discordjs/rest";
 import { Activity, ActivityType, Client, GatewayIntentBits, Routes } from "discord.js";
-import { pingCommand, handlePing } from "./comandos/ping.js";
-import { helpCommand, handleHelp } from './comandos/help.js';
-import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
 import fs from "fs";
 const rawData = fs.readFileSync("./data/config.json");
 const configs = JSON.parse(rawData);
 const date = new Date();
 const ano = date.getFullYear();
+const routesDir = "./comandos"
 config();
 const token = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -20,6 +18,22 @@ const bot = new Client({
   ],
 });
 const rest = new REST({ version: "10" }).setToken(token);
+let commands = [];
+
+// Carrega dinamicamente todos os módulos de rota
+fs.readdirSync(routesDir).forEach(async file => {
+  const filePath = 'file://' + path.resolve(routesDir, file);
+  if (file.endsWith('.js') && file !== 'bot.js' && file !== 'index.js') {
+    try {
+      const { default: command, handle } = await import(filePath);
+      commands.push(command);
+      commands.push(handle);
+      console.log(`Carregando arquivo ${file} automaticamente!`);
+    } catch (error) {
+      console.error(`Erro ao carregar arquivo ${file}, foi tentado usar esse caminho ${filePath} mas sem sucesso. error: `, error);
+    }
+  }
+});
 
 bot.on("ready", async () => {
   const usersCount = bot.users.cache.size;
@@ -36,13 +50,17 @@ bot.on("ready", async () => {
     configs.flag + configs.descricao + ano,
   ];
   const info =
-      "ℹ️" +
-      botTag +
-      " Conectou-se Ao Servidor De Hosteamento \n" +
-      "✅INICIADO POR: WebSiteHost \n" +
-      "Duração:30Min Ou Infinita Pelo Dedicado \n" +
-      "**Alterações:** \n" +
-      configs.lista;
+      `ℹ️ ${botTag} Conectou-se Ao Servidor De Hosteamento
+      \n
+      ✅INICIADO POR: WebSiteHost
+      \n
+      Duração:30Min Ou Infinita Pelo Dedicado
+      \n
+      **Alterações:**
+      \n
+      ${configs.lista}
+      \n
+      Comandos Carregados: ${commands.length/2}`
 
   alterarStatus();
   setInterval(alterarStatus, 60000);
@@ -137,10 +155,6 @@ bot.on("interactionCreate", (interaction) => {
 // });
 
 async function main() {
-  const commands = [
-    pingCommand,
-    helpCommand
-  ];
   try {
     console.log("Recarregando comandos de barra /");
     await rest.put(Routes.applicationCommands(CLIENT_ID), {
