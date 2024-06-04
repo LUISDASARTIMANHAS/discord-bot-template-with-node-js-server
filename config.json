@@ -1,0 +1,24 @@
+{
+    "porta": 8080,
+    "wsSystem":{
+        "portWS":null,
+        "enabled":true,
+        "WSS":false
+    },
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "keys":[
+        "ROOT:keyBypass",
+        "ROOT:ADMIN"
+    ],
+    "blockedRoutes": [
+        "/my-private-route"
+    ],
+    "emailSystem":{
+        "service": "Gmail",
+        "host":null,
+        "port":null,
+        "ssl_tls":true,
+        "user":"",
+        "pass":""
+    }
+}
