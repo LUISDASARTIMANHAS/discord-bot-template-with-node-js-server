@@ -1,7 +1,18 @@
 import { config } from "dotenv";
 import { REST } from "@discordjs/rest";
-import { Activity, ActivityType, Client, GatewayIntentBits, Routes } from "discord.js";
+import {
+  Activity,
+  ActivityType,
+  Client,
+  GatewayIntentBits,
+  Routes,
+} from "discord.js";
 import { fopen, fwrite } from "../modules/autoFileSysModule.js";
+import { helpCommand, handleHelp } from "./comandos/help.js";
+import { pingCommand, handlePing } from "./comandos/ping.js";
+import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
+import { setStatusCommand, handleSetStatus } from "./comandos/setStatus.js";
+
 const configs = fopen("./data/config.json");
 const date = new Date();
 const ano = date.getFullYear();
@@ -16,8 +27,7 @@ const bot = new Client({
   ],
 });
 const rest = new REST({ version: "10" }).setToken(token);
-let commands = [];
-
+let commands = [helpCommand, pingCommand, setStatusCommand];
 
 bot.on("ready", async () => {
   const usersCount = bot.users.cache.size;
@@ -33,8 +43,7 @@ bot.on("ready", async () => {
     `${usersCount} usuários!`,
     configs.flag + configs.descricao + ano,
   ];
-  const info =
-      `ℹ️ ${botTag} Conectou-se Ao Servidor De Hosteamento
+  const info = `ℹ️ ${botTag} Conectou-se Ao Servidor De Hosteamento
       \n
       ✅INICIADO POR: WebSiteHost
       \n
@@ -44,53 +53,53 @@ bot.on("ready", async () => {
       \n
       ${configs.lista}
       \n
-      Comandos Carregados: ${commands.length/2}`
+      Comandos Carregados: ${commands.length / 2}`;
 
   alterarStatus();
   setInterval(alterarStatus, 60000);
-	sendLogsEmbed(
-		channelLogs,
-		"**__🖥️MENSAGEM DO SERVIDOR🖥️:__**",
-		info,
-		16753920,
-		"",
-		""
-	);
+  sendLogsEmbed(
+    channelLogs,
+    "**__🖥️MENSAGEM DO SERVIDOR🖥️:__**",
+    info,
+    16753920,
+    "",
+    ""
+  );
 
   console.log("Usuários:" + usersCount);
   console.log("Canais:" + channelsCount);
   console.log("Servidores:" + guildsCount);
 
   function alterarStatus() {
-    const ramdomActivity = atividades[getRandomInt(atividades.length-1)];
+    const ramdomActivity = atividades[getRandomInt(atividades.length - 1)];
     const status = [
       {
         name: ramdomActivity,
-        type: ActivityType.Competing
+        type: ActivityType.Competing,
       },
       {
         name: "Custom: meu status legal",
-        type: ActivityType.Custom
+        type: ActivityType.Custom,
       },
       {
         name: ramdomActivity,
-        type: ActivityType.Listening
+        type: ActivityType.Listening,
       },
       {
         name: ramdomActivity,
-        type: ActivityType.Playing
+        type: ActivityType.Playing,
       },
       {
         name: ramdomActivity,
         type: ActivityType.Streaming,
-        url: "twitch.tv"
+        url: "twitch.tv",
       },
       {
         name: ramdomActivity,
-        type: ActivityType.Watching
+        type: ActivityType.Watching,
       },
-    ]
-    const ramdomStatus = status[getRandomInt(status.length-1)]
+    ];
+    const ramdomStatus = status[getRandomInt(status.length - 1)];
 
     bot.user.setActivity(ramdomStatus);
     bot.user.setStatus("idle");
@@ -100,43 +109,25 @@ bot.on("ready", async () => {
 });
 
 bot.on("interactionCreate", (interaction) => {
-	handlePing(interaction);
-	handleHelp(interaction);
+  if (
+    interaction.channel?.type == ChannelType.DM ||
+    interaction.channel?.type == undefined
+  ) {
+    return interaction.reply(
+      ":warning: Não e permitido usar comandos em DM. Procure um servidor para usar esse comando."
+    );
+  }
+
+  var getBotPermissons = interaction.guild.members.me.permissions;
+  if (!getBotPermissons.has(PermissionsBitField.Flags.ManageMessages)) {
+    return interaction.reply(
+      ":warning: Não tenho permissões de gerenciar mensagens! ```ManageMessages```"
+    );
+  }
+  handlePing(interaction);
+  handleHelp(interaction);
+  handleSetStatus(interaction);
 });
-
-// bot.on("interactionCreate", (interaction) => {
-//   if ((interaction.isChatInputCommand()) && (interaction.commandName === 'pedido')) {
-//         const comida = interaction.options.get('comidas').value
-//         const bebida = interaction.options.get('bebidas').value
-//         console.log(comida);
-//         console.log(bebida);
-
-//         interaction.reply({
-//             content: "Seu pedido foi feito: " + comida + ", e para acompanhar: " + bebida
-//         })
-//     }
-//   if (interaction.isCommand() && interaction.commandName === "sayembed") {
-//     const titulo = interaction.options.getString("title");
-//     const descricao = interaction.options.getString("description");
-//     const color = parseInt(
-//       interaction.options.getString("color").replace("#", ""),
-//       16
-//     ); // Converte a cor hexadecimal para um número inteiro
-//     const channel = interaction.options.getChannel("channel");
-
-//     const embed = {
-//       title: titulo,
-//       description: descricao,
-//       color: color,
-//     };
-
-//     // Envia o embed diretamente para o canal fornecido
-//     interaction.guild.channels.cache.get(channel.id).send({ embeds: [embed] });
-//     interaction.reply({
-//       content: `Embed enviado para o canal ${channel.name}!`,
-//     });
-//   }
-// });
 
 async function main() {
   try {
