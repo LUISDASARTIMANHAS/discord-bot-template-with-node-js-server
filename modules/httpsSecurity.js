@@ -7,9 +7,7 @@ function httpsSecurityMiddleware(req, res, next) {
     origin: [
       /^https:\/\/.+/,
       /^http:\/\/.+/,
-      "https://discord.com",
-      "https://brasil-eternity.glitch.me/",
-      "brasil-eternity.glitch.me",
+      "https://discord.com"
     ],
     methods: "GET,PUT,POST,DELETE",
     allowedHeaders: [
