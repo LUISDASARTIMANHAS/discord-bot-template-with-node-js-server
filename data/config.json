@@ -1,7 +1,6 @@
 {
     "token": "token here",
     "descricao": "description of bot",
-    "prefix": "prefix",
     "lista": ["logs here"]
   }
   
