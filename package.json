@@ -4,7 +4,7 @@
   "main": "start.js",
   "author": "PINGOBRAS S.A",
   "dependencies": {
-    "@discordjs/builders": "^1.10.0",
+    "@discordjs/builders": "^1.10.1",
     "@discordjs/rest": "^2.3.0",
     "@types/node-fetch": "^2.6.6",
     "bootstrap": "^5.3.2",
