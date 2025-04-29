@@ -12,7 +12,7 @@
     "cors": "^2.8.5",
     "ddos": "^0.2.1",
     "detective-cjs": "^6.0.0",
-    "discord.js": "^14.16.3",
+    "discord.js": "^14.19.2",
     "dotenv": "^16.4.7",
     "encoding": "^0.1.13",
     "express": "^5.0.0",
