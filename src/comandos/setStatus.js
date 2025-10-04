@@ -1,4 +1,4 @@
-import { fopen, fwrite } from "../../modules/autoFileSysModule.js";
+import { fopen, fwrite } from "npm-package-nodejs-utils-lda";
 import { SlashCommandBuilder } from "@discordjs/builders";
 const configs = fopen("./data/config.json");
 

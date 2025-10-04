@@ -1,24 +1,60 @@
 {
-    "porta": 8080,
-    "wsSystem":{
-        "portWS":null,
-        "enabled":true,
-        "WSS":false
-    },
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "keys":[
-        "ROOT:keyBypass",
-        "ROOT:ADMIN"
-    ],
-    "blockedRoutes": [
-        "/my-private-route"
-    ],
-    "emailSystem":{
-        "service": "Gmail",
-        "host":null,
-        "port":null,
-        "ssl_tls":true,
-        "user":"",
-        "pass":""
-    }
+  "porta": 8080,
+  "wsSystem": {
+    "portWS": null,
+    "enabled": true,
+    "WSS": false
+  },
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  "keys": [
+    "ROOT:keyBypass",
+    "ROOT:ADMIN"
+  ],
+  "blockedRoutes": [
+    "/my-private-route"
+  ],
+  "emailSystem": {
+    "service": "Gmail",
+    "host": "smtp.gmail.com",
+    "port": 25,
+    "ssl_tls": true,
+    "user": "example@gmail.com",
+    "pass": ""
+  },
+  "requestLogger": {
+    "enabled": true
+  },
+  "cacheDurationInMinutes": 30,
+  "ORIGIN": [
+    "/^https://.+/"
+  ],
+  "METHODS": "GET,PUT,POST,DELETE",
+  "ALLOWED_HEADERS": [
+    "Content-Type",
+    "Access-Control-Allow-Origin",
+    "authorization",
+    "id",
+    "key",
+    "urlParams",
+    "cache-control",
+    "X-Disable-Cache"
+  ],
+  "ALLOWED_USER_AGENTS": [
+    "Mozilla",
+    "Chrome",
+    "Firefox",
+    "custom/1.0"
+  ],
+  "BLOCKED_USER_AGENTS": [
+    "CensysInspect",
+    "Shodan",
+    "curl",
+    "python-requests",
+    "nmap"
+  ],
+  "discordLogs": {
+    "color": "FF00FF",
+    "footerText": null,
+    "footerUrl": "https://cdn.discordapp.com/attachments/952004420265205810/1188643212378787940/pingobras-logo-fundo.png?ex=6682a481&is=66815301&hm=cc9c387ac2aad7fa8040738f47ae0ab43e2b77027d188e272a147b1829e3a53f&"
+  }
 }

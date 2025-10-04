@@ -127,9 +127,9 @@ import {
 } from "npm-package-nodejs-utils-lda";
 
 // configs e modulos extras
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 import ddosModule from "./modules/ddosModule.js";
-const routesDir = __dirname;
 // const hostname = "127.0.0.1"; só local
 // const hostname = "0.0.0.0"; Bind na placa de rede
 // const hostname = "::"; bind ipv4 e ipv6 pra fora
