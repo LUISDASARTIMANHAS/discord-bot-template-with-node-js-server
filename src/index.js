@@ -12,6 +12,7 @@ import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
 import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
 import { setStatusCommand, handleSetStatus } from "./comandos/setStatus.js";
+import { alterarStatus, validateInteractionChannel, verifyManageMessagesInInteraction } from "./utils.js";
 
 const configs = fopen("./data/config.json");
 const date = new Date();
@@ -35,14 +36,6 @@ bot.on("ready", async () => {
   const guildsCount = bot.guilds.cache.size;
   const botTag = bot.user.tag;
   const channelLogs = await bot.channels.fetch("1032778034811506738");
-  const atividades = [
-    `${guildsCount} servidores!`,
-    configs.flag + configs.descricao + ano,
-    `${channelsCount} canais!`,
-    configs.flag + configs.descricao + ano,
-    `${usersCount} usuários!`,
-    configs.flag + configs.descricao + ano,
-  ];
   const info = `ℹ️ ${botTag} Conectou-se Ao Servidor De Hosteamento
       \n
       ✅INICIADO POR: WebSiteHost
@@ -69,61 +62,12 @@ bot.on("ready", async () => {
   console.log("Usuários:" + usersCount);
   console.log("Canais:" + channelsCount);
   console.log("Servidores:" + guildsCount);
-
-  function alterarStatus() {
-    const ramdomActivity = atividades[getRandomInt(atividades.length - 1)];
-    const status = [
-      {
-        name: ramdomActivity,
-        type: ActivityType.Competing,
-      },
-      {
-        name: "Custom: meu status legal",
-        type: ActivityType.Custom,
-      },
-      {
-        name: ramdomActivity,
-        type: ActivityType.Listening,
-      },
-      {
-        name: ramdomActivity,
-        type: ActivityType.Playing,
-      },
-      {
-        name: ramdomActivity,
-        type: ActivityType.Streaming,
-        url: "twitch.tv",
-      },
-      {
-        name: ramdomActivity,
-        type: ActivityType.Watching,
-      },
-    ];
-    const ramdomStatus = status[getRandomInt(status.length - 1)];
-
-    bot.user.setActivity(ramdomStatus);
-    bot.user.setStatus("idle");
-    console.log("STATUS DO DISCORD DO " + botTag);
-    console.log(`Atividade do Status: ${ramdomActivity}`);
-  }
 });
 
 bot.on("interactionCreate", (interaction) => {
-  if (
-    interaction.channel?.type == ChannelType.DM ||
-    interaction.channel?.type == undefined
-  ) {
-    return interaction.reply(
-      ":warning: Não e permitido usar comandos em DM. Procure um servidor para usar esse comando."
-    );
-  }
+  validateInteractionChannel(interaction);
 
-  var getBotPermissons = interaction.guild.members.me.permissions;
-  if (!getBotPermissons.has(PermissionsBitField.Flags.ManageMessages)) {
-    return interaction.reply(
-      ":warning: Não tenho permissões de gerenciar mensagens! ```ManageMessages```"
-    );
-  }
+  verifyManageMessagesInInteraction(interaction);
   handlePing(interaction);
   handleHelp(interaction);
   handleSetStatus(interaction);
@@ -141,7 +85,3 @@ async function main() {
   }
 }
 main();
-
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
