@@ -31,7 +31,7 @@ const bot = new Client({
 const rest = new REST({ version: "10" }).setToken(token);
 let commands = [helpCommand, pingCommand, setStatusCommand];
 
-bot.on("ready", async () => {
+bot.on("clientReady", async () => {
   const channelLogs = await bot.channels.fetch("1032778034811506738");
 
   alterarStatus(bot);

@@ -1,4 +1,4 @@
-import { ChannelType, PermissionsBitField,ActivityType } from "discord.js";
+import { ChannelType, PermissionsBitField, ActivityType } from "discord.js";
 import { fopen, getRandomInt } from "npm-package-nodejs-utils-lda";
 
 /**
@@ -103,7 +103,21 @@ export function alterarStatus(bot) {
  * @returns {import("discord.js").PermissionsBitField} Retorna as permissões atuais do bot no servidor.
  */
 export function getBotPermissionsByInteraction(interaction) {
-  return interaction.guild.members.me.permissions;
+  if (!interaction.guild) {
+    return null; // Sem guild, não tem permissões
+  }
+  return interaction.guild.members.me?.permissions ?? null;
+}
+
+/**
+ * Verifica se a interação aconteceu em DM ou em um servidor.
+ *
+ * @param {import("discord.js").Interaction} interaction - Interação recebida do Discord.
+ * @returns {boolean} Retorna true se for DM, false se for em servidor.
+ */
+export function isDM(interaction) {
+  // Se não tiver guild ou o canal for DM
+  return !interaction.guild || interaction.channel?.type === ChannelType.DM;
 }
 
 /**
@@ -113,10 +127,21 @@ export function getBotPermissionsByInteraction(interaction) {
  * @param {import("discord.js").Interaction} interaction - Objeto da interação recebida do Discord.
  * @returns {Promise<void>} Retorna uma Promise que resolve quando a verificação termina.
  */
+
 export async function verifyManageMessagesInInteraction(interaction) {
   const botPermissions = getBotPermissionsByInteraction(interaction);
+
+  if (!botPermissions) {
+    // Interação sem guild ou bot ainda não está disponível
+    return replyWarning(
+      interaction,
+      "Não consigo verificar minhas permissões fora de um servidor!",
+      false
+    );
+  }
+
   if (!botPermissions.has(PermissionsBitField.Flags.ManageMessages)) {
-    return await replyWarning(
+    return replyWarning(
       interaction,
       "Não tenho permissões de gerenciar mensagens! \n I don't have permissions to manage messages!",
       false
@@ -132,9 +157,7 @@ export async function verifyManageMessagesInInteraction(interaction) {
  * @returns {Promise<boolean | void>} Retorna false se for em DM, ou void se o canal for válido.
  */
 export async function validateInteractionChannel(interaction) {
-  const channel = getChannelFromInteraction(interaction);
-
-  if (!channel || channel.type === ChannelType.DM) {
+  if (isDM(interaction)) {
     return replyWarning(
       interaction,
       "Não é permitido usar comandos em DM. Procure um servidor para usar esse comando."
@@ -160,10 +183,12 @@ export function getChannelFromInteraction(interaction) {
  * @param {boolean} [isPrivate=true] - Define se a resposta será visível apenas para o autor da interação.
  * @returns {Promise<void>} Retorna uma Promise que resolve quando a resposta for enviada.
  */
+
 export async function replyWarning(interaction, message, isPrivate = true) {
   if (interaction.replied || interaction.deferred) return;
+
   await interaction.reply({
     content: `:warning: ${message}`,
-    ephemeral: isPrivate,
+    flags: isPrivate ? 64 : 0, // 64 = EPHEMERAL
   });
 }
