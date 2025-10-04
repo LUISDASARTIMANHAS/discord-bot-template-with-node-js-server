@@ -4,28 +4,28 @@
   "main": "start.js",
   "author": "PINGOBRAS S.A",
   "dependencies": {
-    "@discordjs/builders": "^1.10.0",
-    "@discordjs/rest": "^2.3.0",
-    "@types/node-fetch": "^2.6.6",
-    "bootstrap": "^5.3.2",
+    "@discordjs/builders": "^1.11.3",
+    "@discordjs/rest": "^2.6.0",
+    "@types/node-fetch": "^2.6.13",
+    "bootstrap": "^5.3.8",
     "bufferutil": "^4.0.9",
     "cors": "^2.8.5",
     "ddos": "^0.2.1",
-    "detective-cjs": "^6.0.0",
-    "discord.js": "^14.16.3",
-    "dotenv": "^17.0.0",
+    "detective-cjs": "^6.0.1",
+    "discord.js": "^14.22.1",
+    "dotenv": "^17.2.3",
     "encoding": "^0.1.13",
-    "express": "^5.0.0",
-    "express-validator": "^7.0.1",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "fetch-blob": "^4.0.0",
     "fs": "^0.0.2",
-    "helmet": "^8.0.0",
-    "node-fetch": "^3.0.0",
-    "nodemon": "^3.1.7",
+    "helmet": "^8.1.0",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.10",
     "path": "^0.12.7",
-    "url": "^0.11.3",
+    "url": "^0.11.4",
     "utf-8-validate": "^6.0.5",
-    "xss": "^1.0.14"
+    "xss": "^1.0.15"
   },
   "type": "module",
   "engines": {
@@ -39,9 +39,10 @@
     "discord"
   ],
   "scripts": {
-    "start": "node server.js",
-    "start:dev": "nodemon server.js",
-    "auto:install":"npm install"
+    "start": "npm run update && node --watch server.js",
+    "update": "npx npm-check-updates -u && npm install",
+    "start:dev": "nodemon start.js",
+    "autoInstall": "npm update && npm install"
   },
   "description": "Template de discord bot usando o node.js para criar site e hospedar bot com o js"
 }
