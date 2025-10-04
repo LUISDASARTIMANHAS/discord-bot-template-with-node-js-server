@@ -132,7 +132,7 @@ export async function verifyManageMessagesInInteraction(interaction) {
   const botPermissions = getBotPermissionsByInteraction(interaction);
 
   if (!botPermissions.has(PermissionsBitField.Flags.ManageMessages)) {
-    return replyWarning(
+    return await replyWarning(
       interaction,
       "Não tenho permissões de gerenciar mensagens! \n I don't have permissions to manage messages!",
       false
@@ -149,7 +149,7 @@ export async function verifyManageMessagesInInteraction(interaction) {
  */
 export async function validateInteractionChannel(interaction) {
   if (isDM(interaction)) {
-    return replyWarning(
+    return await replyWarning(
       interaction,
       "Não é permitido usar comandos em DM. Procure um servidor para usar esse comando."
     );
