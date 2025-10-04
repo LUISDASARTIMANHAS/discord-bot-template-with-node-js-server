@@ -7,7 +7,10 @@ import {
   GatewayIntentBits,
   Routes,
 } from "discord.js";
-import { fopen, fwrite } from "../modules/autoFileSysModule.js";
+const {
+  fopen,
+  fwrite,
+} = require("npm-package-nodejs-utils-lda");
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
 import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";

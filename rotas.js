@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   fetchGet,
   fetchPost,
   notfound,
@@ -15,7 +15,7 @@ const {
   forbidden,
   formatDate,
   conversorSimEnao,
-} = require("npm-package-nodejs-utils-lda");
+} from "npm-package-nodejs-utils-lda";
 
 // Middleware para lidar com rotas não encontradas (404)
 router.use((req, res, next) => {

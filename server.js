@@ -119,19 +119,16 @@
 // 511 Network Authentication Required
 // Indica que o cliente precisa se autenticar para obter acesso à rede.
 import * as bot from "./src/index.js";
-const express = require("express");
+import express from "express";
 let app = express();
-const path = require("path");
-const fs = require("fs");
-const {
+import {
   discordLogs,
-  applyAutoMiddlewares,
-  WSChat,
-} = require("npm-package-nodejs-utils-lda");
+  applyAutoMiddlewares
+} from "npm-package-nodejs-utils-lda";
 
 // configs e modulos extras
 require("dotenv").config();
-const ddosModule = require("./modules/ddosModule.js");
+import ddosModule from "./modules/ddosModule.js";
 const routesDir = __dirname;
 // const hostname = "127.0.0.1"; só local
 // const hostname = "0.0.0.0"; Bind na placa de rede
@@ -141,7 +138,7 @@ const hostname = "::";
 const porta = process.env.PORT;
 
 const date = new Date();
-const diaNumber = date.getDate() - 1;          // número, sem transformar em string ainda
+const diaNumber = date.getDate() - 1; // número, sem transformar em string ainda
 const dia = String(diaNumber).padStart(2, "0"); // agora formata com padStart
 const dia7Number = date.getDate() - 7;
 const dia7 = String(dia7Number).padStart(2, "0");
@@ -159,8 +156,12 @@ var server = app.listen(porta || 0, hostname, function () {
   const addr = server.address();
 
   if (!addr) {
-    console.warn("⚠️  Falha ao obter endereço do servidor (server.address() retornou null)");
-    console.warn("Verifique se a porta já está em uso ou se o IPv6 está ativado.");
+    console.warn(
+      "⚠️  Falha ao obter endereço do servidor (server.address() retornou null)"
+    );
+    console.warn(
+      "Verifique se a porta já está em uso ou se o IPv6 está ativado."
+    );
     return;
   }
 
