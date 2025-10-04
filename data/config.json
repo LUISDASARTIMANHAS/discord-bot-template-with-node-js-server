@@ -1,6 +1,4 @@
 {
-    "token": "token here",
-    "descricao": "description of bot",
-    "lista": ["logs here"]
-  }
-  
+    "flag":":br:",
+    "descricao":"teste"
+}

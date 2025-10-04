@@ -1,34 +1,69 @@
-import { ChannelType, PermissionsBitField } from "discord.js";
+import { ChannelType, PermissionsBitField,ActivityType } from "discord.js";
+import { fopen, getRandomInt } from "npm-package-nodejs-utils-lda";
 
+/**
+ * Retorna o número de usuários que o bot consegue ver.
+ * @param {import("discord.js").Client} bot - Instância do cliente Discord
+ * @returns {number} Número total de usuários
+ */
+export function getUsersCount(bot) {
+  // Soma de todos os membros nos servidores que o bot consegue acessar
+  return bot.guilds.cache.reduce(
+    (total, guild) => total + guild.memberCount,
+    0
+  );
+}
 
-export function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
+/**
+ * Retorna o número de canais que o bot consegue ver.
+ * @param {import("discord.js").Client} bot - Instância do cliente Discord
+ * @returns {number} Número total de canais
+ */
+export function getChannelsCount(bot) {
+  return bot.channels.cache.size;
+}
+
+/**
+ * Retorna o número de servidores em que o bot está.
+ * @param {import("discord.js").Client} bot - Instância do cliente Discord
+ * @returns {number} Número total de servidores
+ */
+export function getGuildsCount(bot) {
+  return bot.guilds.cache.size;
+}
+
+/**
+ * Retorna a tag do bot (nome#1234)
+ * @param {import("discord.js").Client} bot - Instância do cliente Discord
+ * @returns {string} Tag do bot
+ */
+export function getBotTag(bot) {
+  return bot.user?.tag ?? "Desconhecido#0000";
 }
 
 /**
  * Altera o status do bot de forma aleatória entre diferentes atividades e tipos.
  *
- * @param {import("discord.js").Client} bot - Instância do cliente do Discord.
- * @param {import("discord.js").ActivityType} ActivityType - Tipos de atividades (Competing, Playing, Listening, etc.)
- * @param {object} stats - Estatísticas do servidor para exibir no status.
- * @param {number} stats.guildsCount - Número de servidores em que o bot está.
- * @param {number} stats.channelsCount - Número de canais.
- * @param {number} stats.usersCount - Número de usuários.
- * @param {object} configs - Configurações do bot contendo flag e descrição.
- * @param {string} configs.flag - Símbolo ou bandeira.
+ * @param {import("discord.js").Client} bot - Instância do cliente Discord.
  * @param {string} configs.descricao - Descrição do bot.
- * @param {string|number} ano - Ano atual ou variável de referência.
- * @param {string} botTag - Tag do bot para logs.
- * @returns {void} Atualiza o status e loga no console.
+ * @returns {void} Atualiza o status do bot e loga informações no console.
  */
-export function alterarStatus(bot, ActivityType, stats, configs, ano, botTag) {
-  // Cria uma lista de mensagens possíveis de status
+export function alterarStatus(bot) {
+  const date = new Date();
+  const ano = date.getFullYear();
+  const configs = fopen("./data/config.json");
+  const guildsCount = getGuildsCount(bot);
+  const channelsCount = getChannelsCount(bot);
+  const usersCount = getUsersCount(bot);
+  const botTag = getBotTag(bot);
+
+  // Lista de mensagens possíveis de status
   const atividades = [
-    `${stats.guildsCount} servidores!`,
+    `${guildsCount} servidores!`,
     `${configs.flag} ${configs.descricao} ${ano}`,
-    `${stats.channelsCount} canais!`,
+    `${channelsCount} canais!`,
     `${configs.flag} ${configs.descricao} ${ano}`,
-    `${stats.usersCount} usuários!`,
+    `${usersCount} usuários!`,
     `${configs.flag} ${configs.descricao} ${ano}`,
   ];
 
@@ -41,12 +76,16 @@ export function alterarStatus(bot, ActivityType, stats, configs, ano, botTag) {
     { name: "Custom: meu status legal", type: ActivityType.Custom },
     { name: randomActivity, type: ActivityType.Listening },
     { name: randomActivity, type: ActivityType.Playing },
-    { name: randomActivity, type: ActivityType.Streaming, url: "https://twitch.tv" },
+    {
+      name: randomActivity,
+      type: ActivityType.Streaming,
+      url: "https://twitch.tv",
+    },
     { name: randomActivity, type: ActivityType.Watching },
   ];
 
   // Seleciona um status aleatório
-  const randomStatus = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+  const randomStatus = statusOptions[getRandomInt(statusOptions.length)];
 
   // Atualiza status do bot
   bot.user.setActivity(randomStatus);
@@ -56,7 +95,6 @@ export function alterarStatus(bot, ActivityType, stats, configs, ano, botTag) {
   console.log(`STATUS DO DISCORD DO ${botTag}`);
   console.log(`Atividade do Status: ${randomActivity}`);
 }
-
 
 /**
  * Obtém as permissões atuais do bot dentro de uma interação.

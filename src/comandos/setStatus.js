@@ -1,6 +1,6 @@
 import { fopen, fwrite } from "npm-package-nodejs-utils-lda";
 import { SlashCommandBuilder } from "@discordjs/builders";
-const configs = fopen("./data/config.json");
+const configs = fopen("./data/status.json");
 
 let setStatusCommand = new SlashCommandBuilder()
   .setName("set-status")
@@ -45,7 +45,7 @@ function handleSetStatus(interaction) {
     configs.descricao = descricao;
     configs.typeStatus = status;
 
-    fwrite("./data/config.json", configs);
+    fwrite("./data/status.json", configs);
     interaction.reply(
       `O status foi alterado para: ${status} com descrição padrão: ${descricao}.
 			O bot sera reiniciado para aplicar configurações.`
