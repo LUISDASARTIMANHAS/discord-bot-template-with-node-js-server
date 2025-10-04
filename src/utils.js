@@ -131,15 +131,6 @@ export function isDM(interaction) {
 export async function verifyManageMessagesInInteraction(interaction) {
   const botPermissions = getBotPermissionsByInteraction(interaction);
 
-  if (!botPermissions) {
-    // Interação sem guild ou bot ainda não está disponível
-    return replyWarning(
-      interaction,
-      "Não consigo verificar minhas permissões fora de um servidor!",
-      false
-    );
-  }
-
   if (!botPermissions.has(PermissionsBitField.Flags.ManageMessages)) {
     return replyWarning(
       interaction,

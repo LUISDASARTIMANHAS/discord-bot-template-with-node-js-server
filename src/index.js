@@ -68,6 +68,10 @@ async function main() {
     bot.login(token);
   } catch (err) {
     console.log(err);
+    setTimeout(()=>{
+      console.log("restarting...");
+      main();
+    },1000*20);
   }
 }
 main();
