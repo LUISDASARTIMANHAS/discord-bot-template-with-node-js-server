@@ -1,11 +1,17 @@
 import { config } from "dotenv";
 import { REST } from "@discordjs/rest";
+import { Client, GatewayIntentBits, Routes } from "discord.js";
 import {
-  Client,
-  GatewayIntentBits,
-  Routes,
-} from "discord.js";
-import { fopen, fwrite, getChannelsCount, getGuildsCount, getUsersCount } from "npm-package-nodejs-utils-lda";
+  fopen,
+  fwrite,
+  getBotPermissionsByInteraction,
+  getChannelsCount,
+  getGuildsCount,
+  getInteractionSummary,
+  getUsersCount,
+  isDM,
+  replyWarning,
+} from "npm-package-nodejs-utils-lda";
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
 import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
@@ -47,10 +53,27 @@ bot.on("clientReady", async () => {
   console.log("Servidores:" + getGuildsCount(bot));
 });
 
-bot.on("interactionCreate", (interaction) => {
-  validateInteractionChannel(interaction);
+bot.on("interactionCreate", async (interaction) => {
+  const botPermissions = getBotPermissionsByInteraction(interaction);
+  const interactionSummary = getInteractionSummary(interaction);
+  console.log(interactionSummary);
+  if (isDM(interaction)) {
+    return await replyWarning(
+      interaction,
+      "Não é permitido usar comandos em DM. Procure um servidor para usar esse comando."
+    );
+  }
 
-  verifyManageMessagesInInteraction(interaction);
+  if (
+    !botPermissions ||
+    !botPermissions.has(PermissionsBitField.Flags.ManageMessages)
+  ) {
+    return await replyWarning(
+      interaction,
+      "Não tenho permissões de gerenciar mensagens! \n I don't have permissions to manage messages!",
+      false
+    );
+  }
   handlePing(interaction);
   handleHelp(interaction);
   handleSetStatus(interaction);
@@ -62,13 +85,13 @@ async function main() {
     await rest.put(Routes.applicationCommands(CLIENT_ID), {
       body: commands,
     });
-    bot.login(token);
+    await bot.login(token);
   } catch (err) {
     console.log(err);
-    setTimeout(()=>{
+    setTimeout(() => {
       console.log("restarting...");
       main();
-    },1000*20);
+    }, 1000 * 20);
   }
 }
 main();

@@ -1,11 +1,14 @@
 import { ChannelType, PermissionsBitField, ActivityType } from "discord.js";
 import {
   fopen,
+  getBotPermissionsByInteraction,
   getBotTag,
   getChannelsCount,
   getGuildsCount,
   getRandomInt,
   getUsersCount,
+  isDM,
+  replyWarning,
 } from "npm-package-nodejs-utils-lda";
 
 /**
@@ -63,29 +66,6 @@ export function alterarStatus(bot) {
   console.log(`Atividade do Status: ${randomActivity}`);
 }
 
-/**
- * Obtém as permissões atuais do bot dentro de uma interação.
- *
- * @param {import("discord.js").Interaction} interaction - Objeto da interação recebida do Discord.
- * @returns {import("discord.js").PermissionsBitField} Retorna as permissões atuais do bot no servidor.
- */
-export function getBotPermissionsByInteraction(interaction) {
-  if (!interaction.guild) {
-    return null; // Sem guild, não tem permissões
-  }
-  return interaction.guild.members.me?.permissions ?? null;
-}
-
-/**
- * Verifica se a interação aconteceu em DM ou em um servidor.
- *
- * @param {import("discord.js").Interaction} interaction - Interação recebida do Discord.
- * @returns {boolean} Retorna true se for DM, false se for em servidor.
- */
-export function isDM(interaction) {
-  // Se não tiver guild ou o canal for DM
-  return !interaction.guild || interaction.channel?.type === ChannelType.DM;
-}
 
 /**
  * Verifica se o bot possui a permissão "ManageMessages" no servidor.
@@ -98,7 +78,7 @@ export function isDM(interaction) {
 export async function verifyManageMessagesInInteraction(interaction) {
   const botPermissions = getBotPermissionsByInteraction(interaction);
 
-  if (!botPermissions.has(PermissionsBitField.Flags.ManageMessages)) {
+  if ( !botPermissions || !botPermissions.has(PermissionsBitField.Flags.ManageMessages)) {
     return await replyWarning(
       interaction,
       "Não tenho permissões de gerenciar mensagens! \n I don't have permissions to manage messages!",
