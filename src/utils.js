@@ -1,45 +1,12 @@
 import { ChannelType, PermissionsBitField, ActivityType } from "discord.js";
-import { fopen, getRandomInt } from "npm-package-nodejs-utils-lda";
-
-/**
- * Retorna o número de usuários que o bot consegue ver.
- * @param {import("discord.js").Client} bot - Instância do cliente Discord
- * @returns {number} Número total de usuários
- */
-export function getUsersCount(bot) {
-  // Soma de todos os membros nos servidores que o bot consegue acessar
-  return bot.guilds.cache.reduce(
-    (total, guild) => total + guild.memberCount,
-    0
-  );
-}
-
-/**
- * Retorna o número de canais que o bot consegue ver.
- * @param {import("discord.js").Client} bot - Instância do cliente Discord
- * @returns {number} Número total de canais
- */
-export function getChannelsCount(bot) {
-  return bot.channels.cache.size;
-}
-
-/**
- * Retorna o número de servidores em que o bot está.
- * @param {import("discord.js").Client} bot - Instância do cliente Discord
- * @returns {number} Número total de servidores
- */
-export function getGuildsCount(bot) {
-  return bot.guilds.cache.size;
-}
-
-/**
- * Retorna a tag do bot (nome#1234)
- * @param {import("discord.js").Client} bot - Instância do cliente Discord
- * @returns {string} Tag do bot
- */
-export function getBotTag(bot) {
-  return bot.user?.tag ?? "Desconhecido#0000";
-}
+import {
+  fopen,
+  getBotTag,
+  getChannelsCount,
+  getGuildsCount,
+  getRandomInt,
+  getUsersCount,
+} from "npm-package-nodejs-utils-lda";
 
 /**
  * Altera o status do bot de forma aleatória entre diferentes atividades e tipos.
@@ -154,32 +121,4 @@ export async function validateInteractionChannel(interaction) {
       "Não é permitido usar comandos em DM. Procure um servidor para usar esse comando."
     );
   }
-}
-
-/**
- * Retorna o canal de uma interação de forma segura.
- *
- * @param {import("discord.js").Interaction} interaction - Objeto da interação do Discord.
- * @returns {import("discord.js").Channel | null} Retorna o canal da interação ou null se não existir.
- */
-export function getChannelFromInteraction(interaction) {
-  return interaction?.channel ?? null;
-}
-
-/**
- * Envia uma mensagem de aviso para o usuário dentro da interação.
- *
- * @param {import("discord.js").Interaction} interaction - Objeto da interação onde a resposta será enviada.
- * @param {string} message - Mensagem de aviso a ser exibida.
- * @param {boolean} [isPrivate=true] - Define se a resposta será visível apenas para o autor da interação.
- * @returns {Promise<void>} Retorna uma Promise que resolve quando a resposta for enviada.
- */
-
-export async function replyWarning(interaction, message, isPrivate = true) {
-  if (interaction.replied || interaction.deferred) return;
-
-  await interaction.reply({
-    content: `:warning: ${message}`,
-    flags: isPrivate ? 64 : 0, // 64 = EPHEMERAL
-  });
 }

@@ -5,16 +5,13 @@ import {
   GatewayIntentBits,
   Routes,
 } from "discord.js";
-import { fopen, fwrite } from "npm-package-nodejs-utils-lda";
+import { fopen, fwrite, getChannelsCount, getGuildsCount, getUsersCount } from "npm-package-nodejs-utils-lda";
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
 import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
 import { setStatusCommand, handleSetStatus } from "./comandos/setStatus.js";
 import {
   alterarStatus,
-  getChannelsCount,
-  getGuildsCount,
-  getUsersCount,
   validateInteractionChannel,
   verifyManageMessagesInInteraction,
 } from "./utils.js";
