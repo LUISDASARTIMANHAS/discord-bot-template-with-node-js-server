@@ -45,7 +45,9 @@ bot.on("clientReady", async () => {
   const channelLogs = await bot.channels.fetch("1032778034811506738");
 
   alterarStatus(bot);
-  setInterval(alterarStatus, 60000);
+  setInterval(()=>{
+    alterarStatus(bot);
+  }, 60000);
   // sendLogsEmbed(
   //   channelLogs,
   //   "**__🖥️MENSAGEM DO SERVIDOR🖥️:__**",
