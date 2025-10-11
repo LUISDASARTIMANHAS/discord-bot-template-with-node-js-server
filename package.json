@@ -9,6 +9,7 @@
     "@types/node-fetch": "^2.6.13",
     "bootstrap": "^5.3.8",
     "bufferutil": "^4.0.9",
+    "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "ddos": "^0.2.1",
     "detective-cjs": "^6.0.1",
