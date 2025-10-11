@@ -36,15 +36,7 @@ export const execCommand = {
  * @param {import('discord.js').CommandInteraction} interaction - Interação recebida.
  */
 export async function handleExec(interaction) {
-	const OWNER_ID = "SEU_ID_DISCORD_AQUI"; // Substitua pelo seu ID real
 	const comando = interaction.options.getString("comando");
-
-	if (interaction.user.id !== OWNER_ID) {
-		return await interaction.reply({
-			content: "❌ Você não tem permissão para usar este comando.",
-			ephemeral: true,
-		});
-	}
 
 	const bloqueados = ["format", "shutdown", "rd", "del", "rmdir", "erase"];
 	if (bloqueados.some((p) => comando.toLowerCase().includes(p))) {
