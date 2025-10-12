@@ -57,9 +57,9 @@ bot.on("clientReady", async () => {
   //   ""
   // );
 
-  // console.log("Usuários:" + getUsersCount(bot));
-  // console.log("Canais:" + getChannelsCount(bot));
-  // console.log("Servidores:" + getGuildsCount(bot));
+  console.log("Usuários:" + getUsersCount(bot));
+  console.log("Canais:" + getChannelsCount(bot));
+  console.log("Servidores:" + getGuildsCount(bot));
 });
 
 bot.on("interactionCreate", async (interaction) => {
