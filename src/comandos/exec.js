@@ -1,12 +1,15 @@
-// comandos/exec.js
 import { exec } from "child_process";
+const bloqueados = ["cd", "format", "shutdown", "rd", "del", "rmdir", "erase"];
 
 /**
  * Executa um comando no Windows CMD e retorna a saída.
  * @param {string} cmd - O comando CMD a ser executado.
  * @returns {Promise<string>} - A saída do comando.
  */
-export function execCmd(cmd) {
+export async function execCmd(cmd) {
+	if (bloqueados.some((p) => cmd.toLowerCase().includes(p))) {
+		throw new Error("🚫 Esse comando é perigoso e foi bloqueado.");
+	}
 	return new Promise((resolve, reject) => {
 		exec(cmd, { shell: "cmd.exe" }, (error, stdout, stderr) => {
 			if (error) return reject(stderr || error.message);
@@ -25,7 +28,7 @@ export const execCommand = {
 		{
 			name: "comando",
 			description: "Comando a ser executado.",
-			type: 3, // STRING
+			type: 3,
 			required: true,
 		},
 	],
@@ -33,18 +36,12 @@ export const execCommand = {
 
 /**
  * Lida com a execução do comando /exec
- * @param {import('discord.js').CommandInteraction} interaction - Interação recebida.
+ * @param {import('discord.js').CommandInteraction} interaction
  */
 export async function handleExec(interaction) {
-	const comando = interaction.options.getString("comando");
+	if (interaction.commandName !== "exec") return;
 
-	const bloqueados = ["format", "shutdown", "rd", "del", "rmdir", "erase"];
-	if (bloqueados.some((p) => comando.toLowerCase().includes(p))) {
-		return await interaction.reply({
-			content: "🚫 Esse comando é perigoso e foi bloqueado.",
-			ephemeral: true,
-		});
-	}
+	const comando = interaction.options.getString("comando");
 
 	try {
 		await interaction.reply("⏳ Executando comando...");
@@ -53,8 +50,10 @@ export async function handleExec(interaction) {
 			content: `🖥️ Saída:\n\`\`\`\n${resultado.slice(0, 1900)}\n\`\`\``,
 		});
 	} catch (err) {
-		await interaction.editReply({
-			content: `⚠️ Erro ao executar:\n\`\`\`\n${err.slice(0, 1900)}\n\`\`\``,
-		});
-	}
+	console.error(err);
+	await interaction.editReply({
+		content: `⚠️ Erro ao executar:\n\`\`\`\n${(err.message || String(err)).slice(0, 1900)}\n\`\`\``,
+	});
+}
+
 }
