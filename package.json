@@ -16,7 +16,7 @@
     "discord.js": "^14.23.2",
     "dotenv": "^17.2.3",
     "encoding": "^0.1.13",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "express-validator": "^7.2.1",
     "fetch-blob": "^4.0.0",
     "fs": "^0.0.2",
