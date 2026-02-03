@@ -1,30 +1,4 @@
 {
-  "porta": 8080,
-  "wsSystem": {
-    "portWS": null,
-    "enabled": true,
-    "WSS": false
-  },
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "keys": [
-    "ROOT:keyBypass",
-    "ROOT:ADMIN"
-  ],
-  "blockedRoutes": [
-    "/my-private-route"
-  ],
-  "emailSystem": {
-    "service": "Gmail",
-    "host": "smtp.gmail.com",
-    "port": 25,
-    "ssl_tls": true,
-    "user": "example@gmail.com",
-    "pass": ""
-  },
-  "requestLogger": {
-    "enabled": true
-  },
-  "cacheDurationInMinutes": 30,
   "ORIGIN": [
     "/^https://.+/"
   ],
@@ -52,6 +26,20 @@
     "python-requests",
     "nmap"
   ],
+  "requestLogger": {
+    "enabled": true
+  },
+  "cacheDurationInMinutes": 30,
+  "blockedRoutes": [
+    "/default/api"
+  ],
+  "emailSystem": {
+    "service": "Gmail",
+    "host": "smtp.gmail.com",
+    "port": 25,
+    "ssl_tls": true,
+    "user": "example@gmail.com"
+  },
   "discordLogs": {
     "color": "FF00FF",
     "footerText": null,

@@ -137,13 +137,6 @@ const hostname = "::";
 // 0 força o express a pegar uma porta aleatora
 const porta = process.env.PORT;
 
-const date = new Date();
-const diaNumber = date.getDate() - 1; // número, sem transformar em string ainda
-const dia = String(diaNumber).padStart(2, "0"); // agora formata com padStart
-const dia7Number = date.getDate() - 7;
-const dia7 = String(dia7Number).padStart(2, "0");
-const mes = String(date.getMonth() + 1).padStart(2, "0");
-const ano = date.getFullYear();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -171,7 +164,7 @@ var server = app.listen(porta || 0, hostname, function () {
   // Ajuste: se for IPv6, exibir com colchetes [::1]
   const displayHost = host.includes(":") ? `[${host}]` : host;
 
-  console.log("Servidor rodando em http://%s:%s", hostname, port);
+  console.log("Servidor rodando em http://localhost:%s", port);
   console.log("IP Obtido: http://%s:%s", displayHost, port);
-  discordLogs("START", `Servidor rodando em http://${hostname}:${port}`);
+  discordLogs("START", `Servidor rodando em http://localhost:${port}`);
 });

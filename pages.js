@@ -52,12 +52,6 @@ router.get('/status', (req, res) => {
   }
 });
 
-
-router.get("/host", (req, res) => {
-  console.log("SISTEMA <OBTER> <SITE>: " + req.url);
-  res.sendFile(hostFilePath);
-});
-
 router.get("/debugger", (req, res) => {
   console.log("SISTEMA <OBTER> <SITE>: " + req.url);
   res.status(200);

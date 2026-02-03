@@ -1,9 +1,4 @@
 @echo off
-setlocal
-
-rem Atualiza o repositório
 git pull
 
-rem Executa o servidor e gera log único
-set "id=%random%"
-npm run start >> "%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt" 2>&1
+npm run start >> run.log
