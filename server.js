@@ -125,6 +125,8 @@ import {
   discordLogs,
   applyAutoMiddlewares
 } from "npm-package-nodejs-utils-lda";
+import pagesManager from "./pages.js"
+import rotasManager from "./rotas.js"
 
 // configs e modulos extras
 import dotenv from "dotenv";
@@ -141,8 +143,9 @@ const porta = process.env.PORT;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(ddosModule().express);
-
 applyAutoMiddlewares(app);
+app.use(pagesManager);
+app.use(rotasManager);
 
 var server = app.listen(porta || 0, hostname, function () {
   // Corrige: server.address() pode ser null se o bind falhar
