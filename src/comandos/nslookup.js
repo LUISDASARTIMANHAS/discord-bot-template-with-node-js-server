@@ -22,7 +22,7 @@ async function handleNslookup(interaction) {
       await interaction.reply(`⏳ Executando NSLOOKUP IN ${domain}...`);
       const resultado = await execCmd(`nslookup ${domain}`);
       await interaction.editReply({
-        content: `🖥️ Saída:\n\`\`\`\n${resultado.slice(0, 1900)}\n\`\`\``,
+        content: `🖥️ Nslookup ${domain}:\n\`\`\`\n${resultado.slice(0, 1900)}\n\`\`\``,
       });
     } catch (err) {
       console.error(err);
