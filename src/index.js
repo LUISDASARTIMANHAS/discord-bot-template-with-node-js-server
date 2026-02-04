@@ -23,6 +23,7 @@ import { pingCommand, handlePing } from "./comandos/ping.js";
 import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
 import { setStatusCommand, handleSetStatus } from "./comandos/setStatus.js";
 import { execCommand, handleExec } from "./comandos/exec.js";
+import { handleNslookup, nslookupCommand } from "./comandos/nslookup.js";
 import {
   alterarStatus,
   validateInteractionChannel,
@@ -39,7 +40,7 @@ const bot = new Client({
   ],
 });
 const rest = new REST({ version: "10" }).setToken(token);
-let commands = [helpCommand, pingCommand, setStatusCommand, execCommand];
+let commands = [helpCommand, pingCommand, setStatusCommand, execCommand,nslookupCommand];
 
 bot.on("clientReady", async () => {
   const channelLogs = await bot.channels.fetch("1032778034811506738");
@@ -88,6 +89,7 @@ bot.on("interactionCreate", async (interaction) => {
     handleHelp(interaction);
     handleSetStatus(interaction);
     handleExec(interaction);
+    handleNslookup(interaction);
   } catch (error) {
     return await replyWarning(
       interaction,
