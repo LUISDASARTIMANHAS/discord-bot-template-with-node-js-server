@@ -106,6 +106,7 @@ async function main() {
       body: commands,
     });
     await bot.login(token);
+    console.log(commands);
   } catch (err) {
     console.log(err);
     setTimeout(() => {

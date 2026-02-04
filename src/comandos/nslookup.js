@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { execCmd } from "./exec";
+import { execCmd } from "./exec.js";
 
 let nslookupCommand = new SlashCommandBuilder()
   .setName("nslookup")
