@@ -3,7 +3,7 @@ import { execCmd } from "./exec.js";
 
 let tracertCommand = new SlashCommandBuilder()
   .setName("tracert")
-  .setDescription("tool for recording the response delays and routing loops in a network pathway across packet-switched nodes")
+  .setDescription("tool for recording the response delays and routing loops in a network pathway")
   .addStringOption((option) =>
     option
       .setName("domain")
