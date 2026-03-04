@@ -18,6 +18,7 @@ import {
   isDM,
   replyWarning,
 } from "npm-package-nodejs-utils-lda";
+import {tasklistCommand,handleTasklist} from "./comandos/tasklist.js"
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
 import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
@@ -25,6 +26,7 @@ import { setStatusCommand, handleSetStatus } from "./comandos/setStatus.js";
 import { execCommand, handleExec } from "./comandos/exec.js";
 import { handleNslookup, nslookupCommand } from "./comandos/nslookup.js";
 import { handleTracert, tracertCommand } from "./comandos/tracert.js";
+const handles = [handleHelp, handlePing, handleSetStatus, handleExec,handleNslookup,handleTracert,handleTasklist];
 import {
   alterarStatus,
   validateInteractionChannel,
@@ -86,12 +88,10 @@ bot.on("interactionCreate", async (interaction) => {
         false
       );
     }
-    handlePing(interaction);
-    handleHelp(interaction);
-    handleSetStatus(interaction);
-    handleExec(interaction);
-    handleNslookup(interaction);
-    handleTracert(interaction);
+    for (const handle of handles) {
+      await handle(interaction);
+
+    }
   } catch (error) {
     return await replyWarning(
       interaction,
@@ -103,6 +103,10 @@ bot.on("interactionCreate", async (interaction) => {
 
 async function main() {
   try {
+    if (!token || !CLIENT_ID) {
+      console.error("Error: TOKEN or CLIENT_ID not defined in .env");
+      return;
+    }
     console.log("Recarregando comandos de barra /");
     await rest.put(Routes.applicationCommands(CLIENT_ID), {
       body: commands,

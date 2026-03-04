@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 
 let pingCommand = new SlashCommandBuilder()
     .setName('ping')
-    .setDescription('Usado para ver o leg e latencia do bot')
+    .setDescription('Usado para ver o lag e latencia do bot')
 pingCommand = pingCommand.toJSON();
 // ping.js
 function handlePing(interaction) {

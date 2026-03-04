@@ -1,6 +1,6 @@
 {
   "name": "bothoster",
-  "version": "1.6.00",
+  "version": "1.6.1",
   "main": "start.js",
   "author": "PINGOBRAS S.A",
   "dependencies": {
