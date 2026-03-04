@@ -12,9 +12,9 @@
     "child_process": "^1.0.2",
     "cors": "^2.8.6",
     "ddos": "^0.2.1",
-    "detective-cjs": "^6.0.1",
+    "detective-cjs": "^6.1.0",
     "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "encoding": "^0.1.13",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
@@ -22,8 +22,8 @@
     "fs": "^0.0.2",
     "helmet": "^8.1.0",
     "node-fetch": "^3.3.2",
-    "nodemon": "^3.1.11",
-    "npm-package-nodejs-utils-lda": "^1.0.59",
+    "nodemon": "^3.1.14",
+    "npm-package-nodejs-utils-lda": "^1.0.64",
     "path": "^0.12.7",
     "url": "^0.11.4",
     "utf-8-validate": "^6.0.6",
@@ -41,7 +41,7 @@
     "discord"
   ],
   "scripts": {
-    "start": "npm run update && node --watch server.js",
+    "start": "node --watch server.js",
     "update": "npx npm-check-updates -u && npm install",
     "start:dev": "nodemon start.js",
     "autoInstall": "npm update && npm install"

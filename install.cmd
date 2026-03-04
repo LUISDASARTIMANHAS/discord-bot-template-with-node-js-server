@@ -1,1 +1,1 @@
-npm run auto:install
+npm run autoInstall

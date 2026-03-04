@@ -31,8 +31,8 @@ import {
   verifyManageMessagesInInteraction,
 } from "./utils.js";
 config();
-const token = process.env.TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
+const token = process.env.DISCORD_TOKEN;
+const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const bot = new Client({
   intents: [
     GatewayIntentBits.Guilds,
