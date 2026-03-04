@@ -6,4 +6,4 @@ git pull
 
 rem Executa o servidor e gera log único
 set "id=%random%"
-npm run start >> "logs/%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt" 2>&1
+npm run startDedicated >> "logs/%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt" 2>&1

@@ -10,28 +10,27 @@ import {
 import {
   fopen,
   fwrite,
+  setStatusCommand,
+  handleSetStatus,
+  handleExec,
+  execCommand,
+  nslookupCommand,
+  handleNslookup,
+  tracertCommand,
+  handleTracert,
   getBotPermissionsByInteraction,
   getChannelsCount,
   getGuildsCount,
   getInteractionSummary,
   getUsersCount,
-  isDM,
   replyWarning,
+  changeStatus,
+  verifyManageMessagesInInteraction,
+  validateInteractionChannel,
 } from "npm-package-nodejs-utils-lda";
-import {tasklistCommand,handleTasklist} from "./comandos/tasklist.js"
+import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
-import { sendLogs, sendLogsEmbed } from "./comandos/sendLogs.js";
-import { setStatusCommand, handleSetStatus } from "./comandos/setStatus.js";
-import { execCommand, handleExec } from "./comandos/exec.js";
-import { handleNslookup, nslookupCommand } from "./comandos/nslookup.js";
-import { handleTracert, tracertCommand } from "./comandos/tracert.js";
-const handles = [handleHelp, handlePing, handleSetStatus, handleExec,handleNslookup,handleTracert,handleTasklist];
-import {
-  alterarStatus,
-  validateInteractionChannel,
-  verifyManageMessagesInInteraction,
-} from "./utils.js";
 config();
 const token = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -43,14 +42,31 @@ const bot = new Client({
   ],
 });
 const rest = new REST({ version: "10" }).setToken(token);
-let commands = [helpCommand, pingCommand, setStatusCommand, execCommand,nslookupCommand,tracertCommand];
+const handles = [
+  handleHelp,
+  handlePing,
+  handleSetStatus,
+  handleExec,
+  handleNslookup,
+  handleTracert,
+  handleTasklist,
+];
+let commands = [
+  helpCommand,
+  pingCommand,
+  setStatusCommand,
+  execCommand,
+  nslookupCommand,
+  tracertCommand,
+  tasklistCommand
+];
 
 bot.on("clientReady", async () => {
   const channelLogs = await bot.channels.fetch("1032778034811506738");
 
-  alterarStatus(bot);
-  setInterval(()=>{
-    alterarStatus(bot);
+  changeStatus(bot);
+  setInterval(() => {
+    changeStatus(bot);
   }, 60000);
   // sendLogsEmbed(
   //   channelLogs,
@@ -68,35 +84,28 @@ bot.on("clientReady", async () => {
 
 bot.on("interactionCreate", async (interaction) => {
   try {
-    const botPermissions = getBotPermissionsByInteraction(interaction);
     const interactionSummary = getInteractionSummary(interaction);
     console.log(interactionSummary);
-    if (isDM(interaction)) {
-      return await replyWarning(
-        interaction,
-        "Não é permitido usar comandos em DM. Procure um servidor para usar esse comando."
-      );
+    let validationChannel = await validateInteractionChannel(interaction);
+    let validationVerifyManageMessagesInInteraction =
+      await verifyManageMessagesInInteraction(interaction);
+
+    if (validationChannel) {
+      return;
     }
 
-    if (
-      !botPermissions ||
-      !botPermissions.has(PermissionsBitField.Flags.ManageMessages)
-    ) {
-      return await replyWarning(
-        interaction,
-        "Não tenho permissões de gerenciar mensagens! \n I don't have permissions to manage messages!",
-        false
-      );
+    if (validationVerifyManageMessagesInInteraction) {
+      return;
     }
+
     for (const handle of handles) {
       await handle(interaction);
-
     }
   } catch (error) {
     return await replyWarning(
       interaction,
       `ERR: 500 - INTERNAL SERVER ERROR. REASON: ${error}`,
-      false
+      false,
     );
   }
 });

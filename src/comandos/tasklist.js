@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { execCmd } from "./exec.js";
+import { execCmd } from "npm-package-nodejs-utils-lda";
 
 let tasklistCommand = new SlashCommandBuilder()
   .setName("tasklist")

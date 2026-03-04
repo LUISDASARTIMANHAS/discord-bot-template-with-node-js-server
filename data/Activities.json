@@ -1,0 +1,8 @@
+[
+  "${guildsCount} servers!",
+  "${description} - ${ano}",
+  "${channelsCount} channels!",
+  "${description} - ${ano}",
+  "${usersCount} users!",
+  "${description} - ${ano}"
+]

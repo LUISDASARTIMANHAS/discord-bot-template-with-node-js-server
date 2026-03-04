@@ -23,7 +23,7 @@
     "helmet": "^8.1.0",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.14",
-    "npm-package-nodejs-utils-lda": "^1.0.64",
+    "npm-package-nodejs-utils-lda": "^1.0.68",
     "path": "^0.12.7",
     "url": "^0.11.4",
     "utf-8-validate": "^6.0.6",
@@ -41,7 +41,8 @@
     "discord"
   ],
   "scripts": {
-    "start": "node --watch server.js",
+    "startDedicated": "node --watch server.js",
+    "start": "npm run update && node --watch server.js",
     "update": "npx npm-check-updates -u && npm install",
     "start:dev": "nodemon start.js",
     "autoInstall": "npm update && npm install"
