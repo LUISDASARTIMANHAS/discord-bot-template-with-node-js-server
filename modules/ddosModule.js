@@ -2,7 +2,7 @@ import ddos from "ddos";
 
 function configureDdosMiddleware() {
   const params = {
-    limit: 150,
+    limit: 100,
     maxcount: 250,
     trustProxy: true,
     includeUserAgent: true,

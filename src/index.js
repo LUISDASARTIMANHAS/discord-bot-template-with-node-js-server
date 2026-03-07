@@ -32,8 +32,8 @@ import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
 config();
-const token = process.env.DISCORD_TOKEN;
-const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const token = process.env.DISCORD_BOT_TOKEN;
+const CLIENT_ID = process.env.DISCORD_BOT_CLIENT_ID;
 const bot = new Client({
   intents: [
     GatewayIntentBits.Guilds,
