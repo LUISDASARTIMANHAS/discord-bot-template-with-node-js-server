@@ -137,7 +137,7 @@ import ddosModule from "./modules/ddosModule.js";
 // const hostname = "::"; bind ipv4 e ipv6 pra fora
 const hostname = "::";
 // 0 força o express a pegar uma porta aleatora
-const porta = process.env.PORT;
+const porta = process.env.DISCORD_BOT_PORT;
 
 
 app.use(express.urlencoded({ extended: true }));
