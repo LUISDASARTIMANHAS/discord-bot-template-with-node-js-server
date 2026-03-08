@@ -42,15 +42,15 @@ const bot = new Client({
   ],
 });
 const rest = new REST({ version: "10" }).setToken(token);
-const handles = [
-  handleHelp,
-  handlePing,
-  handleSetStatus,
-  handleExec,
-  handleNslookup,
-  handleTracert,
-  handleTasklist,
-];
+const commandHandlers = {
+  help: handleHelp,
+  ping: handlePing,
+  setstatus: handleSetStatus,
+  exec: handleExec,
+  nslookup: handleNslookup,
+  tracert: handleTracert,
+  tasklist: handleTasklist,
+};
 let commands = [
   helpCommand,
   pingCommand,
@@ -84,29 +84,29 @@ bot.on("clientReady", async () => {
 
 bot.on("interactionCreate", async (interaction) => {
   try {
+    if (!interaction.isChatInputCommand()) return;
+
     const interactionSummary = getInteractionSummary(interaction);
     console.log(interactionSummary);
-    let validationChannel = await validateInteractionChannel(interaction);
-    let validationVerifyManageMessagesInInteraction =
-      await verifyManageMessagesInInteraction(interaction);
 
-    if (validationChannel) {
-      return;
-    }
+    if (await validateInteractionChannel(interaction)) return;
+    if (await verifyManageMessagesInInteraction(interaction)) return;
 
-    if (validationVerifyManageMessagesInInteraction) {
-      return;
-    }
+    const handler = commandHandlers[interaction.commandName];
 
-    for (const handle of handles) {
-      await handle(interaction);
+    if (handler) {
+      await handler(interaction);
     }
   } catch (error) {
-    return await replyWarning(
-      interaction,
-      `ERR: 500 - INTERNAL SERVER ERROR. REASON: ${error}`,
-      false,
-    );
+    console.error(error);
+
+    if (!interaction.replied && !interaction.deferred) {
+      await replyWarning(
+        interaction,
+        `ERR: 500 - INTERNAL SERVER ERROR. REASON: ${error}`,
+        false,
+      );
+    }
   }
 });
 
