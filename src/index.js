@@ -1,15 +1,14 @@
 import { config } from "dotenv";
-import { REST } from "@discordjs/rest";
 import {
   Client,
   GatewayIntentBits,
-  PermissionsBitField,
-  Routes,
 } from "discord.js";
 
 import {
   fopen,
   fwrite,
+  pingCommand,
+  curlCommand,
   setStatusCommand,
   handleSetStatus,
   handleExec,
@@ -18,7 +17,8 @@ import {
   handleNslookup,
   tracertCommand,
   handleTracert,
-  getBotPermissionsByInteraction,
+  handlePing,
+  handleCurl,
   getChannelsCount,
   getGuildsCount,
   getInteractionSummary,
@@ -27,12 +27,12 @@ import {
   changeStatus,
   verifyManageMessagesInInteraction,
   validateInteractionChannel,
+  commandsSYNC,
 } from "npm-package-nodejs-utils-lda";
 import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
-import { pingCommand, handlePing } from "./comandos/ping.js";
 import { latencyCommand, handleLatency } from "./comandos/latency.js";
 import { helpCommand, handleHelp } from "./comandos/help.js";
-import { curlCommand, handleCurl } from "./comandos/curl.js";
+import { banCommand, handleBan } from "./comandos/ban.js";
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
 const CLIENT_ID = process.env.DISCORD_BOT_CLIENT_ID;
@@ -43,7 +43,7 @@ const bot = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
-const rest = new REST({ version: "10" }).setToken(token);
+// const rest = new REST({ version: "10" }).setToken(token);
 const commandHandlers = {
   help: handleHelp,
   ping: handlePing,
@@ -54,6 +54,7 @@ const commandHandlers = {
   tasklist: handleTasklist,
   curl: handleCurl,
   latency: handleLatency,
+  ban: handleBan,
 };
 let commands = [
   helpCommand,
@@ -64,7 +65,8 @@ let commands = [
   tracertCommand,
   tasklistCommand,
   curlCommand,
-  latencyCommand
+  latencyCommand,
+  banCommand
 ];
 
 bot.on("clientReady", async () => {
@@ -122,12 +124,8 @@ async function main() {
       console.error("Error: TOKEN or CLIENT_ID not defined in .env");
       return;
     }
-    console.log("Recarregando comandos de barra /");
-    await rest.put(Routes.applicationCommands(CLIENT_ID), {
-      body: commands,
-    });
+    await commandsSYNC(commands);
     await bot.login(token);
-    console.log(commands);
   } catch (err) {
     console.log(err);
     setTimeout(() => {
