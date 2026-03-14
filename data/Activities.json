@@ -1,3 +1,9 @@
 [
-  "${os.hostname}"
+  "${guildsCount} servers!",
+  "${hostname}",
+  "${description} - ${ano}",
+  "${channelsCount} channels!",
+  "${description} - ${ano}",
+  "${usersCount} users!",
+  "${description} - ${ano}"
 ]

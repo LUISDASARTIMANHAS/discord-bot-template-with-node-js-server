@@ -29,8 +29,10 @@ import {
   validateInteractionChannel,
 } from "npm-package-nodejs-utils-lda";
 import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
-import { helpCommand, handleHelp } from "./comandos/help.js";
 import { pingCommand, handlePing } from "./comandos/ping.js";
+import { latencyCommand, handleLatency } from "./comandos/latency.js";
+import { helpCommand, handleHelp } from "./comandos/help.js";
+import { curlCommand, handleCurl } from "./comandos/curl.js";
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
 const CLIENT_ID = process.env.DISCORD_BOT_CLIENT_ID;
@@ -50,6 +52,8 @@ const commandHandlers = {
   nslookup: handleNslookup,
   tracert: handleTracert,
   tasklist: handleTasklist,
+  curl: handleCurl,
+  latency: handleLatency,
 };
 let commands = [
   helpCommand,
@@ -58,7 +62,9 @@ let commands = [
   execCommand,
   nslookupCommand,
   tracertCommand,
-  tasklistCommand
+  tasklistCommand,
+  curlCommand,
+  latencyCommand
 ];
 
 bot.on("clientReady", async () => {
