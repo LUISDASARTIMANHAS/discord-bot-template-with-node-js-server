@@ -5,3 +5,4 @@ node_modules/**
 *bk-keys*
 logs/**
 *.log
+package-lock.json
