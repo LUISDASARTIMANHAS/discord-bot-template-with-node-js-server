@@ -20,7 +20,7 @@ async function handleTasklist(interaction) {
   if (interaction.commandName === "tasklist") {
     const parameters = interaction.options.getString("parameters");
 
-    discordHandleExecTemplate(interaction, `tasklist ${parameters}`);
+    discordHandleExecTemplate(interaction, "tasklist",parameters);
   }
 }
 

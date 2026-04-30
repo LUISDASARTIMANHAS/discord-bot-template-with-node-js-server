@@ -1,8 +1,6 @@
+// index.js
 import { config } from "dotenv";
-import {
-  Client,
-  GatewayIntentBits,
-} from "discord.js";
+import { Client, GatewayIntentBits } from "discord.js";
 
 import {
   fopen,
@@ -33,6 +31,8 @@ import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
 import { latencyCommand, handleLatency } from "./comandos/latency.js";
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { banCommand, handleBan } from "./comandos/ban.js";
+import { ticketCommand, handleTicket } from "./comandos/ticket.js";
+import { handleTicketButtons } from "./handlers/ticketHandler.js";
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
 const CLIENT_ID = process.env.DISCORD_BOT_CLIENT_ID;
@@ -55,6 +55,7 @@ const commandHandlers = {
   curl: handleCurl,
   latency: handleLatency,
   ban: handleBan,
+  ticket: handleTicket,
 };
 let commands = [
   helpCommand,
@@ -66,7 +67,8 @@ let commands = [
   tasklistCommand,
   curlCommand,
   latencyCommand,
-  banCommand
+  banCommand,
+  ticketCommand,
 ];
 
 bot.on("clientReady", async () => {
@@ -92,6 +94,11 @@ bot.on("clientReady", async () => {
 
 bot.on("interactionCreate", async (interaction) => {
   try {
+    if (interaction.isButton()) {
+      await handleTicketButtons(interaction);
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const interactionSummary = getInteractionSummary(interaction);
