@@ -5,18 +5,6 @@ import { Client, GatewayIntentBits } from "discord.js";
 import {
   fopen,
   fwrite,
-  pingCommand,
-  curlCommand,
-  setStatusCommand,
-  handleSetStatus,
-  handleExec,
-  execCommand,
-  nslookupCommand,
-  handleNslookup,
-  tracertCommand,
-  handleTracert,
-  handlePing,
-  handleCurl,
   getChannelsCount,
   getGuildsCount,
   getInteractionSummary,
@@ -26,6 +14,8 @@ import {
   verifyManageMessagesInInteraction,
   validateInteractionChannel,
   commandsSYNC,
+  defaultCommands,
+  defaultCommandHandlers,
 } from "npm-package-nodejs-utils-lda";
 import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
 import { latencyCommand, handleLatency } from "./comandos/latency.js";
@@ -43,29 +33,18 @@ const bot = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
-// const rest = new REST({ version: "10" }).setToken(token);
 const commandHandlers = {
+  ...defaultCommandHandlers,
   help: handleHelp,
-  ping: handlePing,
-  setstatus: handleSetStatus,
-  exec: handleExec,
-  nslookup: handleNslookup,
-  tracert: handleTracert,
   tasklist: handleTasklist,
-  curl: handleCurl,
   latency: handleLatency,
   ban: handleBan,
   ticket: handleTicket,
 };
 let commands = [
+  ...defaultCommands,
   helpCommand,
-  pingCommand,
-  setStatusCommand,
-  execCommand,
-  nslookupCommand,
-  tracertCommand,
   tasklistCommand,
-  curlCommand,
   latencyCommand,
   banCommand,
   ticketCommand,
