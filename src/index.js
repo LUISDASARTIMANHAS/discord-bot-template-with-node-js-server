@@ -80,8 +80,8 @@ bot.on("interactionCreate", async (interaction) => {
 
     if (!interaction.isChatInputCommand()) return;
 
-    const interactionSummary = getInteractionSummary(interaction);
-    console.log(interactionSummary);
+    // const interactionSummary = getInteractionSummary(interaction);
+    // console.log(interactionSummary);
 
     if (await validateInteractionChannel(interaction)) return;
     if (await verifyManageMessagesInInteraction(interaction)) return;
