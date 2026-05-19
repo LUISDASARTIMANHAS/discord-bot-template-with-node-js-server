@@ -12,7 +12,7 @@
     "child_process": "^1.0.2",
     "cors": "^2.8.6",
     "ddos": "^0.2.1",
-    "detective-cjs": "^6.1.1",
+    "detective-cjs": "^7.0.0",
     "discord.js": "^14.26.4",
     "dotenv": "^17.4.2",
     "encoding": "^0.1.13",
