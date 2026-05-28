@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } from "discord.js";
 import { setEmbed } from "npm-package-nodejs-utils-lda";
 
 let ticketCommand = new SlashCommandBuilder()
@@ -9,6 +9,7 @@ let ticketCommand = new SlashCommandBuilder()
     option
       .setName("categoria")
       .setDescription("Categoria onde os tickets serão criados")
+      .addChannelTypes(ChannelType.GuildCategory)
       .setRequired(false)
   )
   .addRoleOption((option) =>

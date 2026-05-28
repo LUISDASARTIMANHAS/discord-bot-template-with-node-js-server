@@ -2,6 +2,8 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  ChannelType,
+  MessageFlags,
 } from "discord.js";
 import {
   setEmbed,
@@ -28,6 +30,17 @@ async function handleTicketButtons(interaction) {
      */
     const categoryId = parts[1] !== "none" ? parts[1] : null;
     const staffRoleId = parts[2] !== "none" ? parts[2] : null;
+
+    if (categoryId) {
+      const category = interaction.guild?.channels.cache.get(categoryId);
+      if (!category || category.type !== ChannelType.GuildCategory) {
+        await interaction.reply({
+          content: "Categoria inválida para tickets. Use uma categoria válida.",
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+    }
 
     const channel = await createTicketChannelFromInteraction(interaction, {
       categoryId,
@@ -60,7 +73,7 @@ async function handleTicketButtons(interaction) {
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
         content: `Ticket criado: ${channel}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   }
@@ -69,7 +82,17 @@ async function handleTicketButtons(interaction) {
   // FECHAR TICKET
   // =========================
   if (interaction.customId === "close_ticket") {
-    await closeTicket(interaction);
+    try {
+      await closeTicket(interaction);
+    } catch (error) {
+      console.error(error);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: "Erro ao fechar o ticket. Tente novamente mais tarde.",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+    }
   }
 }
 
