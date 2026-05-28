@@ -7,7 +7,7 @@ latencyCommand = latencyCommand.toJSON();
 // ping.js
 function handleLatency(interaction) {
     if (interaction.commandName === 'latency') {
-        interaction.reply('Pong!');
+        interaction.editReply('Pong!');
     }
 }
 

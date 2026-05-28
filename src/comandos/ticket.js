@@ -46,7 +46,7 @@ async function handleTicket(interaction) {
       .setStyle(ButtonStyle.Success)
   );
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [embed],
     components: [row],
   });
