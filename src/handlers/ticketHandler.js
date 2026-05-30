@@ -31,13 +31,23 @@ async function handleTicketButtons(interaction) {
     const categoryId = parts[1] !== "none" ? parts[1] : null;
     const staffRoleId = parts[2] !== "none" ? parts[2] : null;
 
+    if (!interaction.deferred && !interaction.replied) {
+      await interaction.deferReply({ ephemeral: true });
+    }
+
     if (categoryId) {
       const category = interaction.guild?.channels.cache.get(categoryId);
       if (!category || category.type !== ChannelType.GuildCategory) {
-        await interaction.reply({
-          content: "Categoria inválida para tickets. Use uma categoria válida.",
-          flags: MessageFlags.Ephemeral,
-        });
+        if (interaction.deferred || interaction.replied) {
+          await interaction.editReply({
+            content: "Categoria inválida para tickets. Use uma categoria válida.",
+          });
+        } else {
+          await interaction.reply({
+            content: "Categoria inválida para tickets. Use uma categoria válida.",
+            flags: MessageFlags.Ephemeral,
+          });
+        }
         return;
       }
     }
@@ -47,7 +57,14 @@ async function handleTicketButtons(interaction) {
       staffRoleId,
     });
 
-    if (!channel) return;
+    if (!channel) {
+      if (!interaction.replied && interaction.deferred) {
+        await interaction.editReply({
+          content: "Não foi possível abrir o ticket. Tente novamente mais tarde.",
+        });
+      }
+      return;
+    }
 
     const embed = setEmbed(
       "📩 Ticket Aberto",
@@ -70,7 +87,11 @@ async function handleTicketButtons(interaction) {
       components: [row],
     });
 
-    if (!interaction.replied && !interaction.deferred) {
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({
+        content: `Ticket criado: ${channel}`,
+      });
+    } else {
       await interaction.reply({
         content: `Ticket criado: ${channel}`,
         flags: MessageFlags.Ephemeral,
