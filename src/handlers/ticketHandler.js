@@ -59,12 +59,12 @@ async function saveTicketTranscript(channel, interaction) {
   }
 }
 
-async function sendTranscriptToLogChannel(interaction, transcriptPath) {
-  const logChannelId = process.env.TICKET_LOG_CHANNEL_ID;
-  if (!logChannelId || !transcriptPath) return;
+async function sendTranscriptToLogChannel(interaction, transcriptPath, logChannelId) {
+  const channelId = logChannelId || process.env.TICKET_LOG_CHANNEL_ID;
+  if (!channelId || !transcriptPath) return;
 
   const logChannel = await interaction.client.channels
-    .fetch(logChannelId)
+    .fetch(channelId)
     .catch(() => null);
   if (!logChannel?.isTextBased()) return;
 
@@ -109,6 +109,8 @@ async function handleTicketButtons(interaction) {
       }
     }
 
+    const logChannelId = parts[3] !== "none" ? parts[3] : null;
+
     const channel = await createTicketChannelFromInteraction(interaction, {
       categoryId,
       staffRoleId,
@@ -143,7 +145,7 @@ async function handleTicketButtons(interaction) {
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("close_ticket")
+        .setCustomId(`close_ticket:${logChannelId || "none"}`)
         .setLabel("Fechar Ticket")
         .setStyle(ButtonStyle.Danger),
     );
@@ -165,10 +167,13 @@ async function handleTicketButtons(interaction) {
   // =========================
   // FECHAR TICKET
   // =========================
-  if (interaction.customId === "close_ticket") {
+  if (interaction.customId.startsWith("close_ticket")) {
     try {
+      const parts = interaction.customId.split(":");
+      const closeLogChannelId = parts[1] !== "none" ? parts[1] : null;
+
       const transcriptPath = await saveTicketTranscript(interaction.channel, interaction);
-      await sendTranscriptToLogChannel(interaction, transcriptPath);
+      await sendTranscriptToLogChannel(interaction, transcriptPath, closeLogChannelId);
       await closeTicket(interaction);
     } catch (error) {
       console.error(error);
