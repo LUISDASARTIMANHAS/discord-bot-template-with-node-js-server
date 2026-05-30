@@ -22,6 +22,7 @@ import { latencyCommand, handleLatency } from "./comandos/latency.js";
 import { helpCommand, handleHelp } from "./comandos/help.js";
 import { banCommand, handleBan } from "./comandos/ban.js";
 import { ticketCommand, handleTicket } from "./comandos/ticket.js";
+import { statusCommand, handleStatus } from "./comandos/status.js";
 import { handleTicketButtons } from "./handlers/ticketHandler.js";
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -40,6 +41,7 @@ const commandHandlers = {
   latency: handleLatency,
   ban: handleBan,
   ticket: handleTicket,
+  status: handleStatus,
 };
 let commands = [
   ...defaultCommands,
@@ -48,6 +50,7 @@ let commands = [
   latencyCommand,
   banCommand,
   ticketCommand,
+  statusCommand,
 ];
 
 bot.on("clientReady", async () => {

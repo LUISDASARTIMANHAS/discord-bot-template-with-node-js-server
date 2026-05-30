@@ -4,7 +4,7 @@ import { setEmbed } from "npm-package-nodejs-utils-lda";
 
 let ticketCommand = new SlashCommandBuilder()
   .setName("ticket")
-  .setDescription("Cria painel de tickets")
+  .setDescription("Cria painel de tickets profissional")
   .addChannelOption((option) =>
     option
       .setName("categoria")
@@ -16,6 +16,13 @@ let ticketCommand = new SlashCommandBuilder()
     option
       .setName("cargo_suporte")
       .setDescription("Cargo que terá acesso aos tickets")
+      .setRequired(false)
+  )
+  .addChannelOption((option) =>
+    option
+      .setName("log_channel")
+      .setDescription("Canal para enviar a transcrição do ticket")
+      .addChannelTypes(ChannelType.GuildText)
       .setRequired(false)
   );
 
@@ -29,19 +36,39 @@ async function handleTicket(interaction) {
 
   const categoria = interaction.options.getChannel("categoria");
   const cargo = interaction.options.getRole("cargo_suporte");
+  const logChannel = interaction.options.getChannel("log_channel");
+
+  const categoriaTexto = categoria ? categoria.name : "Sem categoria definida";
+  const suporteTexto = cargo ? `<@&${cargo.id}>` : "Sem cargo configurado";
+  const logChannelTexto = logChannel ? `<#${logChannel.id}>` : "Sem canal de transcrição definido";
 
   const embed = setEmbed(
-    "🎫 Sistema de Tickets",
-    "Clique no botão abaixo para abrir um ticket.",
+    "🎫 Painel de Tickets",
+    "Abra um ticket para falar diretamente com a nossa equipe de suporte. Todas as conversas são registradas e arquivadas automaticamente.",
     0x00aeff,
     "Suporte",
     ""
   );
 
+  embed.fields = [
+    {
+      name: "Como funciona",
+      value: "1️⃣ Clique em **Abrir Ticket**\n2️⃣ Descreva seu problema com detalhes\n3️⃣ Aguarde nosso atendimento na conversa privada",
+      inline: false,
+    },
+    { name: "Categoria", value: categoriaTexto, inline: true },
+    { name: "Cargo de suporte", value: suporteTexto, inline: true },
+    {
+      name: "Boas práticas",
+      value: "Explique o problema, inclua prints se puder e não feche o ticket antes de receber a confirmação.",
+      inline: false,
+    },
+  ];
+
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(
-        `create_ticket:${categoria?.id || "none"}:${cargo?.id || "none"}`
+        `create_ticket:${categoria?.id || "none"}:${cargo?.id || "none"}:${logChannel?.id || "none"}`
       )
       .setLabel("Abrir Ticket")
       .setStyle(ButtonStyle.Success)

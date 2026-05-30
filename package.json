@@ -42,7 +42,7 @@
   ],
   "scripts": {
     "startDedicated": "node --watch server.js",
-    "start": "npm run update && node --watch server.js",
+    "start": "npm run update && nodemon server.js",
     "update": "npx npm-check-updates -u && npm install",
     "start:dev": "nodemon start.js",
     "autoInstall": "npm update && npm install"
