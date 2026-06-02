@@ -9,7 +9,10 @@ import {
 import {
   setEmbed,
   createTicketChannelFromInteraction,
+  createStaffDiscussionThread,
   closeTicket,
+  parseTicketCreateCustomId,
+  parseTicketCloseCustomId,
   fwrite,
 } from "npm-package-nodejs-utils-lda";
 import { existsSync, mkdirSync } from "fs";
@@ -181,109 +184,6 @@ async function sendTranscriptToLogChannel(interaction, transcriptData, logChanne
 }
 
 /**
- * Gera um número sequencial para o nome do canal
- * @param {import("discord.js").Guild} guild
- * @param {string} type
- * @returns {Promise<number>}
- */
-async function getNextTicketNumber(guild, type) {
-  const channels = guild.channels.cache.filter(
-    (ch) => ch.isTextBased() && ch.name.startsWith(`${type}-`),
-  );
-  if (channels.size === 0) return 1;
-
-  const numbers = channels
-    .map((ch) => {
-      const match = ch.name.match(new RegExp(`^${type}-.+-([0-9]+)$`));
-      return match ? parseInt(match[1]) : 0;
-    })
-    .filter((n) => n > 0);
-
-  return Math.max(...numbers) + 1;
-}
-
-/**
- * Cria um canal de ticket com nome personalizado e tópico de staff
- * @param {import("discord.js").ButtonInteraction} interaction
- * @param {string} ticketType
- * @param {string} categoryId
- * @param {string} staffRoleId
- * @returns {Promise<import("discord.js").TextChannel|null>}
- */
-async function createTicketChannel(interaction, ticketType, categoryId, staffRoleId) {
-  try {
-    if (!interaction.guild) return null;
-
-    // Gerar número sequencial
-    const ticketNumber = await getNextTicketNumber(interaction.guild, ticketType);
-    const username = interaction.user.username.replace(/[^a-z0-9-_]/gi, "").substring(0, 10);
-    const channelName = `${ticketType}-${username}-${String(ticketNumber).padStart(3, "0")}`;
-
-    // Preparar permissões
-    const permissionOverwrites = [
-      {
-        id: interaction.guild.id,
-        deny: ["ViewChannel"],
-      },
-      {
-        id: interaction.user.id,
-        allow: ["ViewChannel", "SendMessages", "ReadMessageHistory", "AttachFiles"],
-      },
-    ];
-
-    // Adicionar role de staff se fornecida
-    if (staffRoleId) {
-      permissionOverwrites.push({
-        id: staffRoleId,
-        allow: ["ViewChannel", "SendMessages", "ReadMessageHistory", "AttachFiles"],
-      });
-    }
-
-    // Criar canal
-    const channel = await interaction.guild.channels.create({
-      name: channelName,
-      type: ChannelType.GuildText,
-      parent: categoryId,
-      permissionOverwrites,
-      topic: `[${ticketType.toUpperCase()}] Ticket de ${interaction.user.tag} • Aberto em ${new Date().toLocaleString("pt-BR")}`,
-    });
-
-    return channel;
-  } catch (err) {
-    console.error("[createTicketChannel]:", err);
-    return null;
-  }
-}
-
-/**
- * Cria um tópico privado para discussão de staff
- * @param {import("discord.js").TextChannel} ticketChannel
- * @param {string} staffRoleId
- * @returns {Promise<import("discord.js").ThreadChannel|null>}
- */
-async function createStaffTopic(ticketChannel, staffRoleId) {
-  try {
-    if (!staffRoleId) return null;
-
-    const topic = await ticketChannel.threads.create({
-      name: "🔒 Discussão Privada - Staff",
-      autoArchiveDuration: 60,
-      type: ChannelType.PrivateThread,
-    });
-
-    // Adicionar apenas staff
-    if (staffRoleId) {
-      await topic.members.add(staffRoleId);
-    }
-
-    return topic;
-  } catch (err) {
-    console.error("[createStaffTopic]:", err);
-    return null;
-  }
-}
-
-/**
  * Handler de botões do sistema de ticket
  * @param {import("discord.js").Interaction} interaction
  */
@@ -294,16 +194,12 @@ async function handleTicketButtons(interaction) {
   // CRIAR TICKET (CLASSIFICADO)
   // =========================
   if (interaction.customId.startsWith("create_ticket")) {
-    const parts = interaction.customId.split(":");
-
-    /**
-     * Estrutura esperada:
-     * create_ticket:type:categoryId:staffRoleId:logChannelId
-     */
-    const ticketType = parts[1] || "geral";
-    const categoryId = parts[2] !== "none" ? parts[2] : null;
-    const staffRoleId = parts[3] !== "none" ? parts[3] : null;
-    const logChannelId = parts[4] !== "none" ? parts[4] : null;
+    const {
+      ticketType,
+      categoryId,
+      staffRoleId,
+      logChannelId,
+    } = parseTicketCreateCustomId(interaction.customId);
 
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferReply({ ephemeral: true });
@@ -326,13 +222,11 @@ async function handleTicketButtons(interaction) {
       }
     }
 
-    // Criar canal com nome personalizado
-    const channel = await createTicketChannel(
-      interaction,
+    const channel = await createTicketChannelFromInteraction(interaction, {
       ticketType,
       categoryId,
       staffRoleId,
-    );
+    });
 
     if (!channel) {
       if (!interaction.replied && interaction.deferred) {
@@ -343,8 +237,7 @@ async function handleTicketButtons(interaction) {
       return;
     }
 
-    // Criar tópico privado para staff
-    const staffTopic = await createStaffTopic(channel, staffRoleId);
+    const staffTopic = await createStaffDiscussionThread(channel, staffRoleId);
 
     const embed = setEmbed(
       `🎫 Ticket ${ticketType.charAt(0).toUpperCase() + ticketType.slice(1)} Aberto`,
@@ -411,9 +304,9 @@ async function handleTicketButtons(interaction) {
   // =========================
   if (interaction.customId.startsWith("close_ticket")) {
     try {
-      const parts = interaction.customId.split(":");
-      const ticketType = parts[1] || "geral";
-      const closeLogChannelId = parts[2] !== "none" ? parts[2] : null;
+      const { ticketType, logChannelId: closeLogChannelId } = parseTicketCloseCustomId(
+        interaction.customId,
+      );
 
       const transcriptData = await saveTicketTranscript(interaction.channel, interaction);
       await sendTranscriptToLogChannel(interaction, transcriptData, closeLogChannelId);

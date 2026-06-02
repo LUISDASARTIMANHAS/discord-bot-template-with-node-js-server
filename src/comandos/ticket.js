@@ -5,7 +5,7 @@ import {
   ButtonStyle,
   ChannelType,
 } from "discord.js";
-import { createField, setEmbed } from "npm-package-nodejs-utils-lda";
+import { buildTicketCreateCustomId, createField, setEmbed } from "npm-package-nodejs-utils-lda";
 
 // Definição das classificações de tickets
 const TICKET_TYPES = {
@@ -108,19 +108,19 @@ async function handleTicket(interaction) {
   const row1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(
-        `create_ticket:geral:${categoria?.id || "none"}:${cargo?.id || "none"}:${logChannel?.id || "none"}`,
+        buildTicketCreateCustomId("geral", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
       )
       .setLabel("📋 Geral")
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId(
-        `create_ticket:bug:${categoria?.id || "none"}:${cargo?.id || "none"}:${logChannel?.id || "none"}`,
+        buildTicketCreateCustomId("bug", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
       )
       .setLabel("🐛 Bug")
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(
-        `create_ticket:suport:${categoria?.id || "none"}:${cargo?.id || "none"}:${logChannel?.id || "none"}`,
+        buildTicketCreateCustomId("suport", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
       )
       .setLabel("🆘 Suporte")
       .setStyle(ButtonStyle.Success),
@@ -129,13 +129,13 @@ async function handleTicket(interaction) {
   const row2 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(
-        `create_ticket:denuncia:${categoria?.id || "none"}:${cargo?.id || "none"}:${logChannel?.id || "none"}`,
+        buildTicketCreateCustomId("denuncia", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
       )
       .setLabel("⚠️ Denúncia")
       .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId(
-        `create_ticket:solicitacao:${categoria?.id || "none"}:${cargo?.id || "none"}:${logChannel?.id || "none"}`,
+        buildTicketCreateCustomId("solicitacao", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
       )
       .setLabel("📝 Solicitação")
       .setStyle(ButtonStyle.Secondary),
