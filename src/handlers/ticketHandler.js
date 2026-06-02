@@ -181,6 +181,109 @@ async function sendTranscriptToLogChannel(interaction, transcriptData, logChanne
 }
 
 /**
+ * Gera um número sequencial para o nome do canal
+ * @param {import("discord.js").Guild} guild
+ * @param {string} type
+ * @returns {Promise<number>}
+ */
+async function getNextTicketNumber(guild, type) {
+  const channels = guild.channels.cache.filter(
+    (ch) => ch.isTextBased() && ch.name.startsWith(`${type}-`),
+  );
+  if (channels.size === 0) return 1;
+
+  const numbers = channels
+    .map((ch) => {
+      const match = ch.name.match(new RegExp(`^${type}-.+-([0-9]+)$`));
+      return match ? parseInt(match[1]) : 0;
+    })
+    .filter((n) => n > 0);
+
+  return Math.max(...numbers) + 1;
+}
+
+/**
+ * Cria um canal de ticket com nome personalizado e tópico de staff
+ * @param {import("discord.js").ButtonInteraction} interaction
+ * @param {string} ticketType
+ * @param {string} categoryId
+ * @param {string} staffRoleId
+ * @returns {Promise<import("discord.js").TextChannel|null>}
+ */
+async function createTicketChannel(interaction, ticketType, categoryId, staffRoleId) {
+  try {
+    if (!interaction.guild) return null;
+
+    // Gerar número sequencial
+    const ticketNumber = await getNextTicketNumber(interaction.guild, ticketType);
+    const username = interaction.user.username.replace(/[^a-z0-9-_]/gi, "").substring(0, 10);
+    const channelName = `${ticketType}-${username}-${String(ticketNumber).padStart(3, "0")}`;
+
+    // Preparar permissões
+    const permissionOverwrites = [
+      {
+        id: interaction.guild.id,
+        deny: ["ViewChannel"],
+      },
+      {
+        id: interaction.user.id,
+        allow: ["ViewChannel", "SendMessages", "ReadMessageHistory", "AttachFiles"],
+      },
+    ];
+
+    // Adicionar role de staff se fornecida
+    if (staffRoleId) {
+      permissionOverwrites.push({
+        id: staffRoleId,
+        allow: ["ViewChannel", "SendMessages", "ReadMessageHistory", "AttachFiles"],
+      });
+    }
+
+    // Criar canal
+    const channel = await interaction.guild.channels.create({
+      name: channelName,
+      type: ChannelType.GuildText,
+      parent: categoryId,
+      permissionOverwrites,
+      topic: `[${ticketType.toUpperCase()}] Ticket de ${interaction.user.tag} • Aberto em ${new Date().toLocaleString("pt-BR")}`,
+    });
+
+    return channel;
+  } catch (err) {
+    console.error("[createTicketChannel]:", err);
+    return null;
+  }
+}
+
+/**
+ * Cria um tópico privado para discussão de staff
+ * @param {import("discord.js").TextChannel} ticketChannel
+ * @param {string} staffRoleId
+ * @returns {Promise<import("discord.js").ThreadChannel|null>}
+ */
+async function createStaffTopic(ticketChannel, staffRoleId) {
+  try {
+    if (!staffRoleId) return null;
+
+    const topic = await ticketChannel.threads.create({
+      name: "🔒 Discussão Privada - Staff",
+      autoArchiveDuration: 60,
+      type: ChannelType.PrivateThread,
+    });
+
+    // Adicionar apenas staff
+    if (staffRoleId) {
+      await topic.members.add(staffRoleId);
+    }
+
+    return topic;
+  } catch (err) {
+    console.error("[createStaffTopic]:", err);
+    return null;
+  }
+}
+
+/**
  * Handler de botões do sistema de ticket
  * @param {import("discord.js").Interaction} interaction
  */
@@ -188,17 +291,19 @@ async function handleTicketButtons(interaction) {
   if (!interaction.isButton()) return;
 
   // =========================
-  // CRIAR TICKET (DINÂMICO)
+  // CRIAR TICKET (CLASSIFICADO)
   // =========================
   if (interaction.customId.startsWith("create_ticket")) {
     const parts = interaction.customId.split(":");
 
     /**
      * Estrutura esperada:
-     * create_ticket:categoryId:staffRoleId
+     * create_ticket:type:categoryId:staffRoleId:logChannelId
      */
-    const categoryId = parts[1] !== "none" ? parts[1] : null;
-    const staffRoleId = parts[2] !== "none" ? parts[2] : null;
+    const ticketType = parts[1] || "geral";
+    const categoryId = parts[2] !== "none" ? parts[2] : null;
+    const staffRoleId = parts[3] !== "none" ? parts[3] : null;
+    const logChannelId = parts[4] !== "none" ? parts[4] : null;
 
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferReply({ ephemeral: true });
@@ -221,12 +326,13 @@ async function handleTicketButtons(interaction) {
       }
     }
 
-    const logChannelId = parts[3] !== "none" ? parts[3] : null;
-
-    const channel = await createTicketChannelFromInteraction(interaction, {
+    // Criar canal com nome personalizado
+    const channel = await createTicketChannel(
+      interaction,
+      ticketType,
       categoryId,
       staffRoleId,
-    });
+    );
 
     if (!channel) {
       if (!interaction.replied && interaction.deferred) {
@@ -237,12 +343,11 @@ async function handleTicketButtons(interaction) {
       return;
     }
 
-    await channel.setTopic(
-      `Ticket de ${interaction.user.tag} • Aberto em ${new Date().toLocaleString("pt-BR")}`,
-    ).catch(() => null);
+    // Criar tópico privado para staff
+    const staffTopic = await createStaffTopic(channel, staffRoleId);
 
     const embed = setEmbed(
-      "📩 Ticket Aberto",
+      `🎫 Ticket ${ticketType.charAt(0).toUpperCase() + ticketType.slice(1)} Aberto`,
       "Obrigado por abrir um ticket. Nossa equipe de suporte irá responder o mais rápido possível.",
       0x00ff00,
       "Aguardando atendimento",
@@ -251,37 +356,51 @@ async function handleTicketButtons(interaction) {
 
     embed.fields = [
       {
+        name: "Classificação",
+        value: `**${ticketType.toUpperCase()}**`,
+        inline: true,
+      },
+      {
+        name: "Usuário",
+        value: `<@${interaction.user.id}>`,
+        inline: true,
+      },
+      {
         name: "Instruções",
         value: "Por favor, descreva seu problema com detalhes e adicione capturas de tela quando necessário.",
         inline: false,
       },
       {
         name: "Importante",
-        value: "Esta conversa será registrada e arquivada como transcrição após o fechamento.",
+        value: "Esta conversa será registrada e arquivada como transcrição após o fechamento. A equipe de suporte tem um tópico privado para discussão.",
         inline: false,
       },
     ];
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`close_ticket:${logChannelId || "none"}`)
+        .setCustomId(`close_ticket:${ticketType}:${logChannelId || "none"}`)
         .setLabel("Fechar Ticket")
         .setStyle(ButtonStyle.Danger),
     );
 
+    const staffMessage = staffTopic
+      ? `\n\n🔒 **Tópico de Staff:** ${staffTopic}`
+      : "";
+
     await channel.send({
-      content: `<@${interaction.user.id}>`,
+      content: `<@${interaction.user.id}>${staffMessage}`,
       embeds: [embed],
       components: [row],
     });
 
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply({
-        content: `Ticket criado: ${channel}`,
+        content: `✅ Ticket criado: ${channel}\n**Classificação:** ${ticketType.toUpperCase()}`,
       });
     } else {
       await interaction.reply({
-        content: `Ticket criado: ${channel}`,
+        content: `✅ Ticket criado: ${channel}\n**Classificação:** ${ticketType.toUpperCase()}`,
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -293,7 +412,8 @@ async function handleTicketButtons(interaction) {
   if (interaction.customId.startsWith("close_ticket")) {
     try {
       const parts = interaction.customId.split(":");
-      const closeLogChannelId = parts[1] !== "none" ? parts[1] : null;
+      const ticketType = parts[1] || "geral";
+      const closeLogChannelId = parts[2] !== "none" ? parts[2] : null;
 
       const transcriptData = await saveTicketTranscript(interaction.channel, interaction);
       await sendTranscriptToLogChannel(interaction, transcriptData, closeLogChannelId);

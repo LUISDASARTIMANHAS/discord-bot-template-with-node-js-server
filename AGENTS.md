@@ -1,92 +1,69 @@
 # AI Agent Instructions for discord-bot-template-with-node-js-server
 
-This repository is a Node.js Discord bot and Express server template with a simple web interface and ticket system.
+This repository is a Node.js Discord bot and Express server template with a simple web interface, API routes, and a ticket system.
 
 ## What this project is
 
-- **Backend app**: `server.js` sets up an Express app with security middleware, DDOS protection, and loads routes from `pages.js` and `rotas.js`.
-- **Discord bot**: `src/index.js` initializes a `discord.js` client, registers slash commands, and handles interactions.
-- **Commands**: `src/comandos/*.js` contains slash command definitions and handlers.
-- **Ticket system**: `src/handlers/ticketHandler.js` manages ticket button interactions with dynamic customIds.
-- **Logging & Cache**: Request logging enabled in `config.json`; activity data stored in `data/Activities.json`.
-
-## Important files
-
-- `server.js` — main Express server entry point and middleware setup
-- `src/index.js` — Discord bot initialization, command registration, and interaction handling
-- `src/comandos/` — command definitions and handlers
-- `src/handlers/ticketHandler.js` — ticket button flows and channel creation/closure
-- `rotas.js` — API route registration using `npm-package-nodejs-utils-lda`
-- `modules/ddosModule.js` — rate-limit middleware configuration
-- `config.json` — app configuration values for origin, headers, user agents, and logging
-- `README.md` — template description only, not authoritative for implementation details
+- **Express web server**: `server.js` configures Express 5, security middleware, DDOS protection, page routes, and API routes.
+- **Discord bot**: `src/index.js` configures `discord.js`, registers slash commands, and handles interactions.
+- **Slash commands**: `src/comandos/*.js` contains command definitions and handlers.
+- **Ticket button flow**: `src/handlers/ticketHandler.js` processes ticket-related button interactions.
+- **Page routes**: `pages.js` exposes static files and dashboards.
+- **API routes**: `rotas.js` registers routes via `npm-package-nodejs-utils-lda`.
+- **Config**: `config.json` stores CORS, headers, logging, and cache settings.
+- **Runtime data**: `data/Activities.json` and `data/status.json` are managed by the bot.
 
 ## Run / development commands
 
-- `npm start` — updates dependencies via `npm-check-updates -u` and starts `server.js` with Node watch mode
-- `npm run start:dev` — starts `start.js` via `nodemon` (alternative bot runtime path)
-- `npm run startDedicated` — starts `server.js` with Node `--watch` flag
+- `npm start` — updates dependencies via `npm-check-updates` and starts `server.js` with `nodemon`
+- `npm run start:dev` — starts `start.js` via `nodemon`
+- `npm run startDedicated` — starts `server.js` with `node --watch`
 - `npm run autoInstall` — runs `npm update && npm install`
 
-## Environment and runtime notes
+## Environment
 
-- Uses `type: module` and ES module imports.
-- Expects `.env` variables like `DISCORD_BOT_TOKEN`, `DISCORD_BOT_CLIENT_ID`, and `DISCORD_BOT_PORT`.
-- Uses external package `npm-package-nodejs-utils-lda` for many Discord and Express helpers.
-- The server binds to IPv6 by default (`::`) and falls back to `localhost` output.
+- Node 24.x
+- `type: module`
+- Required `.env` variables: `DISCORD_BOT_TOKEN`, `DISCORD_BOT_CLIENT_ID`, `DISCORD_BOT_PORT`
+- Do not hardcode secrets.
 
-## Command creation pattern
+## Architecture
 
-Every slash command follows this structure:
+- `server.js` is the web process: it creates the Express app, mounts middleware, and imports `pages.js` and `rotas.js`.
+- `src/index.js` is the Discord bot process: it initializes the client, defines command registration, and handles `interactionCreate` events.
+- `pages.js` exports page routes and dashboards.
+- `rotas.js` exports API routes and 404 handling.
+- `src/comandos/` defines command objects and handlers.
+- `src/handlers/ticketHandler.js` handles button interaction flows.
 
-1. **Command Definition** (using `SlashCommandBuilder` from `@discordjs/builders`):
-   ```js
-   let cmdCommand = new SlashCommandBuilder()
-     .setName("cmd")
-     .setDescription("Description")
-     .addUserOption(...)  // or other option types
-     .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator); // if needed
-   cmdCommand = cmdCommand.toJSON();
-   ```
+## Command registration pattern
 
-2. **Handler Function** (named `handle<CommandName>`):
-   - Check `interaction.commandName` matches the command name
-   - Extract options via `interaction.options.getUser()`, `getString()`, etc.
-   - Use helper functions from `npm-package-nodejs-utils-lda` (e.g., `banUser`, `createTicketChannelFromInteraction`)
-   - Reply using `interaction.reply()` or `replyWarning()`
+1. Define commands in `src/comandos/<name>.js` using `SlashCommandBuilder`
+2. Export a handler function named `handle<Name>`
+3. Import both the command and handler in `src/index.js`
+4. Add the command to `commands` and the handler to `commandHandlers`
+5. Use `commandsSYNC(commands)` to register Discord commands
 
-3. **Registration** in `src/index.js`:
-   - Import both the command object and handler function
-   - Add command to `commands` array
-   - Add handler to `commandHandlers` object with key matching command name
+## Button interaction pattern
 
-## Button handler pattern
+- `interactionCreate` checks `interaction.isButton()` first
+- `src/handlers/ticketHandler.js` processes ticket buttons
+- `customId` format: `create_ticket:categoryId:staffRoleId` with `"none"` for missing values
+- Validate inputs before sending follow-up responses
 
-Custom button interactions (e.g., ticket creation) are handled in `src/handlers/ticketHandler.js`:
-- Check `interaction.isButton()` in the main interaction handler
-- Use `customId` format: `create_ticket:categoryId:staffRoleId` (use `"none"` for null values)
-- Validate IDs and permissions before processing
-- Use embedded `ActionRowBuilder` and `ButtonBuilder` for follow-up buttons
+## Agent guidance
 
-## What AI agents should prioritize
-
-1. **Preserve patterns**: Maintain the command/handler/registration pattern when adding new commands.
-2. **Use helpers**: Leverage `npm-package-nodejs-utils-lda` functions (e.g., `banUser`, `replyWarning`, `createTicketChannelFromInteraction`).
-3. **Separate concerns**: Keep Express route logic (`server.js`, `rotas.js`) completely separate from Discord bot logic (`src/`).
-4. **Environment handling**: Respect `.env` variables (`DISCORD_BOT_TOKEN`, `DISCORD_BOT_CLIENT_ID`, `DISCORD_BOT_PORT`); do not hardcode secrets.
-5. **Logging convention**: Use `fopen()` and `fwrite()` helpers for logging to files in `logs/`.
+- Preserve existing command and route patterns.
+- Prefer `npm-package-nodejs-utils-lda` helpers when available.
+- Keep Express route logic separate from Discord bot logic.
+- Do not register commands or route interaction handlers outside `src/index.js`.
+- Inspect source files directly; `README.md` is not authoritative.
+- There is no automated test suite; use runtime verification and careful review.
 
 ## When the codebase is unclear
 
-- Inspect [src/index.js](src/index.js#L1) first for interaction flows, command registration, and event listeners.
-- Inspect [server.js](server.js#L1) for middleware setup and route composition.
-- Check [src/comandos/](src/comandos/) for command pattern examples (start with [ban.js](src/comandos/ban.js)).
-- Review [config.json](config.json) for CORS, logging, cache, and Discord embed settings.
-
-## Project notes
-
-- **No tests**: This repository has no dedicated test suite; manual testing or CI integration would be beneficial.
-- **Documentation authority**: `README.md` is template-level only; rely on AGENTS.md and code inspection for implementation details.
-- **External dependencies**: The project heavily depends on `npm-package-nodejs-utils-lda` (v1.0.83+) for bot, Discord, and Express helpers.
-- **Data files**: `data/Activities.json` and status JSON are managed by the bot at runtime; do not manually edit unless necessary.
-- **Node version**: Requires Node 24.x (pinned in `package.json`); development should use this version.
+- Inspect `src/index.js` first for Discord flow and command handling.
+- Inspect `server.js` for Express startup and middleware.
+- Inspect `src/comandos/` for command examples, especially `ban.js`.
+- Inspect `src/handlers/ticketHandler.js` for button flow.
+- Use `config.json` for runtime and security settings.
