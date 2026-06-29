@@ -46,5 +46,8 @@
     "tls_port: ": 587,
     "user: ": "example@gmail.com",
     "ssl_tls: ": true
+  },
+  "discordRequestLogger": {
+    "enabled": true
   }
 }

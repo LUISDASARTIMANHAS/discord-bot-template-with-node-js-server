@@ -27,12 +27,14 @@ config();
 const token = process.env.DISCORD_BOT_TOKEN;
 const CLIENT_ID = process.env.DISCORD_BOT_CLIENT_ID;
 const bot = new Client({
-  intents: [
+    intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
   ],
+    rest: { timeout: 30000 } // Increases the timeout limit to 30 seconds
 });
+
 const commandHandlers = {
   ...defaultCommandHandlers,
   help: handleHelp,
