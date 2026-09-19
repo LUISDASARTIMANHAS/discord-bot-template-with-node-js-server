@@ -49,5 +49,13 @@
   },
   "discordRequestLogger": {
     "enabled": true
-  }
+  },
+  "requireValidKeyRoutes": [
+    "/default/api",
+    "/api/auth",
+    "/api/discord",
+    "/api/mongodb",
+    "/api/users",
+    "/api/youtube"
+  ]
 }
