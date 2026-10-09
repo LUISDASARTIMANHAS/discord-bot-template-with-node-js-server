@@ -1,0 +1,456 @@
+[
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "host",
+        "description": "Hostname or IP address.",
+        "required": true
+      },
+      {
+        "max_value": 20,
+        "min_value": 1,
+        "type": 4,
+        "name": "--count",
+        "description": "Number of echo requests.",
+        "required": false
+      },
+      {
+        "name": "--ipv4",
+        "description": "Force IPv4.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--ipv6",
+        "description": "Force IPv6.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "type": 3,
+        "name": "args",
+        "description": "Additional ping arguments.",
+        "required": false
+      }
+    ],
+    "name": "ping",
+    "description": "Test network connectivity and measure latency.",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Online",
+            "value": "online"
+          },
+          {
+            "name": "Do not disturb",
+            "value": "dnd"
+          },
+          {
+            "name": "idle",
+            "value": "idle"
+          },
+          {
+            "name": "invisible",
+            "value": "invisible"
+          }
+        ],
+        "name": "status",
+        "description": "Qual o tipo do status?",
+        "required": true
+      },
+      {
+        "type": 3,
+        "name": "description",
+        "description": "Qual a descrição do status? // What is the status description?",
+        "required": true
+      }
+    ],
+    "name": "set-status",
+    "description": "Usado para definir o status do bot. // Used to define the bot's status.",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "command",
+        "description": "Command to be executed. // Comando a ser executado.",
+        "required": true
+      },
+      {
+        "type": 3,
+        "name": "args",
+        "description": "args. extra args",
+        "required": false
+      }
+    ],
+    "name": "exec",
+    "description": "Executes a command in the system (Windows CMD). // Executa um comando no sistema (CMD do Windows).",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "domain",
+        "description": "Hostname or IP address.",
+        "required": true
+      },
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "A",
+            "value": "A"
+          },
+          {
+            "name": "AAAA",
+            "value": "AAAA"
+          },
+          {
+            "name": "MX",
+            "value": "MX"
+          },
+          {
+            "name": "TXT",
+            "value": "TXT"
+          },
+          {
+            "name": "NS",
+            "value": "NS"
+          },
+          {
+            "name": "SOA",
+            "value": "SOA"
+          },
+          {
+            "name": "PTR",
+            "value": "PTR"
+          },
+          {
+            "name": "CNAME",
+            "value": "CNAME"
+          },
+          {
+            "name": "SRV",
+            "value": "SRV"
+          },
+          {
+            "name": "ANY",
+            "value": "ANY"
+          }
+        ],
+        "name": "--type",
+        "description": "DNS record type.",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "--server",
+        "description": "DNS server to query.",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "args",
+        "description": "Additional nslookup arguments.",
+        "required": false
+      }
+    ],
+    "name": "nslookup",
+    "description": "Query DNS records using nslookup.",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "domain",
+        "description": "Hostname or IP address.",
+        "required": true
+      },
+      {
+        "name": "--ipv4",
+        "description": "Force IPv4.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--ipv6",
+        "description": "Force IPv6.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--no-dns",
+        "description": "Do not resolve IP addresses to hostnames.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "max_value": 255,
+        "min_value": 1,
+        "type": 4,
+        "name": "--max-hops",
+        "description": "Maximum number of hops.",
+        "required": false
+      },
+      {
+        "max_value": 60000,
+        "min_value": 100,
+        "type": 4,
+        "name": "--timeout",
+        "description": "Timeout in milliseconds.",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "args",
+        "description": "Additional tracert arguments.",
+        "required": false
+      }
+    ],
+    "name": "tracert",
+    "description": "Trace the route packets take to a network host.",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "domain",
+        "description": "enter domain or ip to curl",
+        "required": true
+      },
+      {
+        "type": 3,
+        "name": "--output",
+        "description": "Saves the download to a specific file name.",
+        "required": false
+      },
+      {
+        "name": "--remote-name",
+        "description": "Saves the file using its remote name from the URL.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--location",
+        "description": "Automatically follows HTTP redirects (301/302 status codes).",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--include",
+        "description": "Prints the server's HTTP response headers along with the body.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--head",
+        "description": "Fetches only the HTTP headers without downloading the body.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--insecure",
+        "description": "Bypasses SSL certificate checks (useful for self-signed certs).",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--verbose",
+        "description": "Shows the full handshake, request headers, and response info.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "type": 3,
+        "name": "--user-agent",
+        "description": "specify the User-Agent string.",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "args",
+        "description": "extra args",
+        "required": false
+      }
+    ],
+    "name": "curl",
+    "description": "curl is used in command lines or scripts to transfer data. curl is also libcurl",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "status",
+    "description": "Mostra as estatísticas e o status atual do bot",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "target",
+        "description": "Hostname, IP address or network.",
+        "required": true
+      },
+      {
+        "name": "--ipv6",
+        "description": "Enable IPv6 scanning.",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--ping-scan",
+        "description": "Ping scan only (-sn).",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--service-version",
+        "description": "Detect service versions (-sV).",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--os-detection",
+        "description": "Enable OS detection (-O).",
+        "required": false,
+        "type": 5
+      },
+      {
+        "name": "--aggressive",
+        "description": "Aggressive scan (-A).",
+        "required": false,
+        "type": 5
+      },
+      {
+        "type": 3,
+        "name": "--ports",
+        "description": "Ports to scan (e.g. 80,443 or 1-1000).",
+        "required": false
+      },
+      {
+        "max_value": 65535,
+        "min_value": 1,
+        "type": 4,
+        "name": "--top-ports",
+        "description": "Scan the top N most common ports.",
+        "required": false
+      },
+      {
+        "max_value": 5,
+        "min_value": 0,
+        "type": 4,
+        "name": "--timing",
+        "description": "Timing template (0-5).",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "args",
+        "description": "Additional nmap arguments.",
+        "required": false
+      }
+    ],
+    "name": "nmap",
+    "description": "Network mapper and security scanner.",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "prompt",
+        "description": "prompt",
+        "required": false
+      }
+    ],
+    "name": "agy",
+    "description": "Google's Antigravity CLI.",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "help",
+    "description": "Usado para ver os comandos e informações",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "parameters",
+        "description": "parameters. tasklist /v /fi 'PID gt 1000' /fo csv",
+        "required": false
+      }
+    ],
+    "name": "tasklist",
+    "description": "Windows que exibe todos os processos e programas em execução no computador local ou remoto.",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "latency",
+    "description": "Usado para ver o lag e latencia do bot",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "target",
+        "description": "User to ban",
+        "required": true,
+        "type": 6
+      },
+      {
+        "type": 3,
+        "name": "reason",
+        "description": "Reason for the ban",
+        "required": false
+      }
+    ],
+    "name": "ban",
+    "description": "Ban a user from the server",
+    "default_member_permissions": "4",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "channel_types": [
+          4
+        ],
+        "name": "categoria",
+        "description": "Categoria onde os tickets serão criados",
+        "required": false,
+        "type": 7
+      },
+      {
+        "name": "cargo_suporte",
+        "description": "Cargo que terá acesso aos tickets e tópicos privados",
+        "required": false,
+        "type": 8
+      },
+      {
+        "channel_types": [
+          0
+        ],
+        "name": "log_channel",
+        "description": "Canal para enviar a transcrição do ticket",
+        "required": false,
+        "type": 7
+      }
+    ],
+    "name": "ticket",
+    "description": "Cria painel de tickets profissional com classificações",
+    "type": 1
+  }
+]
