@@ -75,6 +75,9 @@ bot.on("clientReady", async () => {
 
 bot.on("interactionCreate", async (interaction) => {
   try {
+    // O erro "O aplicativo não respondeu" no Discord ocorre porque o bot tem um prazo de 3 segundos para responder a uma interação de comando de barra (slash command). Se o código demorar mais do que isso ou travar, o Discord cancela a interação
+    // Solução: Use a função de adiamento da resposta logo no início do comando para avisar o Discord que o bot está processando:
+    await interaction.deferReply();
     if (interaction.isButton()) {
       await handleTicketButtons(interaction);
       return;
