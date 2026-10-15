@@ -1,6 +1,6 @@
 {
   "name": "bothoster",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "main": "start.js",
   "author": "PINGOBRAS S.A",
   "dependencies": {
@@ -14,7 +14,7 @@
     "ddos": "^0.2.1",
     "detective-cjs": "^7.0.0",
     "discord.js": "^14.27.0",
-    "dotenv": "^18.0.6",
+    "dotenv": "^18.0.8",
     "encoding": "^0.1.13",
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.1",
@@ -42,7 +42,7 @@
     "discord"
   ],
   "scripts": {
-    "start": "npm run update && nodemon server.js",
+    "start": "nodemon server.js",
     "update": "npx npm-check-updates -u && npm install",
     "start:dev": "nodemon start.js",
     "autoInstall": "npm update && npm run update"
