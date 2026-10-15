@@ -16,6 +16,7 @@ import {
   commandsSYNC,
   defaultCommands,
   defaultCommandHandlers,
+  initializeDefaultCommands,
 } from "npm-package-nodejs-utils-lda";
 import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
 import { latencyCommand, handleLatency } from "./comandos/latency.js";
@@ -72,6 +73,8 @@ bot.on("clientReady", async () => {
   console.log("Canais:" + getChannelsCount(bot));
   console.log("Servidores:" + getGuildsCount(bot));
 });
+
+initializeDefaultCommands(bot);
 
 bot.on("interactionCreate", async (interaction) => {
   try {

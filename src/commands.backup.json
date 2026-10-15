@@ -294,6 +294,12 @@
     "type": 1
   },
   {
+    "options": [],
+    "name": "monitor",
+    "description": "Cria um painel de monitoramento ao vivo do bot",
+    "type": 1
+  },
+  {
     "options": [
       {
         "type": 3,
