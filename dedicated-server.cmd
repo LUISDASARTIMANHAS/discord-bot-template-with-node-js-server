@@ -1,11 +1,16 @@
 @echo off
 setlocal
 
-title=Atualiza o repositório
+title=Atualiza o repositorio
+
 @rem Atualiza o repositório
 git pull
 
-@rem Executa o servidor e gera log único
+@rem Gera identificador único para o log
 set "id=%random%"
-title=%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt
-npm run startDedicated >> "logs/%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt" 2>&1
+set "log=logs/%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt"
+
+@rem Executa o servidor com prioridade alta
+title=%id%-WINDOWS-SERVER-%COMPUTERNAME%
+
+start "" /high cmd /c "npm run start >> "%log%" 2>&1"
