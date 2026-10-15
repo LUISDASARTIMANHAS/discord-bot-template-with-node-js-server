@@ -1,0 +1,10 @@
+{
+	"watch": [
+		"src"
+	],
+	"ext": "js,json",
+	"ignore": [
+		"data/**",
+		"src/commands.backup.json"
+	]
+}
