@@ -1,13 +1,12 @@
 // index.js
 import { config } from "dotenv";
 import { Client, GatewayIntentBits } from "discord.js";
+import { Agent, setGlobalDispatcher } from "undici";
+import dns from "node:dns";
 
 import {
-  fopen,
-  fwrite,
   getChannelsCount,
   getGuildsCount,
-  getInteractionSummary,
   getUsersCount,
   replyWarning,
   changeStatus,
@@ -52,6 +51,21 @@ let commands = [
   banCommand,
   ticketCommand,
 ];
+
+// FORÇA O USO DE IPV4 PORQUE O DISCORD NÃO TEM SUPORTE A IPV6, USAR O IPV6 PODE GERAR ERROS DE CONEXÃO COM O DISCORD
+setGlobalDispatcher(
+  new Agent({
+    connect: {
+      lookup(hostname, options, callback) {
+        dns.lookup(
+          hostname,
+          { ...options, family: 4 },
+          callback
+        );
+      },
+    },
+  })
+);
 
 bot.on("clientReady", async () => {
   const channelLogs = await bot.channels.fetch("1032778034811506738");
