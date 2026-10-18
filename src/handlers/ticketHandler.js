@@ -1,6 +1,8 @@
+// handlers/ticketHandler.js
 
 import {
   createTicketSystem,
+  registerButtonHandler,
 } from "npm-package-nodejs-utils-lda";
 
 export const ticketSystem = createTicketSystem({
@@ -30,8 +32,35 @@ export const ticketSystem = createTicketSystem({
 
 /**
  * Handler central dos botões de tickets.
- * Pode ser utilizado pelo dispatcher do pacote.
+ * Encaminha a interação para o sistema de tickets.
+ *
+ * @param {import("discord.js").ButtonInteraction} interaction
+ * @returns {Promise<boolean>}
  */
 export async function handleTicketButtons(interaction) {
-  return ticketSystem.handleInteraction(interaction);
+  console.log("[TICKET] handleTicketButtons foi chamado.");
+  console.log("[TICKET] Custom ID:", interaction.customId);
+
+  try {
+    const result = await ticketSystem.handleInteraction(interaction);
+    console.log("[TICKET] handleInteraction retornou:", result);
+    return result;
+  } catch (error) {
+    console.error("[TICKET] Erro no sistema de tickets:", error);
+    throw error;
+  }
 }
+
+// Registra os handlers por prefixo apenas uma vez,
+// quando este módulo é carregado.
+registerButtonHandler(
+  "create_ticket:",
+  handleTicketButtons,
+  { prefix: true },
+);
+
+registerButtonHandler(
+  "close_ticket:",
+  handleTicketButtons,
+  { prefix: true },
+);
