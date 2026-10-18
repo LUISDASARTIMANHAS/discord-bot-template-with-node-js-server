@@ -441,7 +441,7 @@
       },
       {
         "name": "cargo_suporte",
-        "description": "Cargo que terá acesso aos tickets e tópicos privados",
+        "description": "Cargo que terá acesso aos tickets",
         "required": false,
         "type": 8
       },
@@ -450,13 +450,13 @@
           0
         ],
         "name": "log_channel",
-        "description": "Canal para enviar a transcrição do ticket",
+        "description": "Canal para enviar a transcrição dos tickets",
         "required": false,
         "type": 7
       }
     ],
     "name": "ticket",
-    "description": "Cria painel de tickets profissional com classificações",
+    "description": "Cria um painel profissional de tickets",
     "type": 1
   }
 ]

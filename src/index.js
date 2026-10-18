@@ -17,22 +17,33 @@ import {
   defaultCommandHandlers,
   initializeDefaultCommands,
 } from "npm-package-nodejs-utils-lda";
+
 import { tasklistCommand, handleTasklist } from "./comandos/tasklist.js";
+
 import { latencyCommand, handleLatency } from "./comandos/latency.js";
+
 import { helpCommand, handleHelp } from "./comandos/help.js";
+
 import { banCommand, handleBan } from "./comandos/ban.js";
+
 import { ticketCommand, handleTicket } from "./comandos/ticket.js";
+
 import { handleTicketButtons } from "./handlers/ticketHandler.js";
+
 config();
+
 const token = process.env.DISCORD_BOT_TOKEN;
 const CLIENT_ID = process.env.DISCORD_BOT_CLIENT_ID;
+
 const bot = new Client({
-    intents: [
+  intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
   ],
-    rest: { timeout: 30000 } // Increases the timeout limit to 30 seconds
+  rest: {
+    timeout: 30000,
+  },
 });
 
 const commandHandlers = {
@@ -43,7 +54,8 @@ const commandHandlers = {
   ban: handleBan,
   ticket: handleTicket,
 };
-let commands = [
+
+const commands = [
   ...defaultCommands,
   helpCommand,
   tasklistCommand,
@@ -52,58 +64,43 @@ let commands = [
   ticketCommand,
 ];
 
-// FORÇA O USO DE IPV4 PORQUE O DISCORD NÃO TEM SUPORTE A IPV6, USAR O IPV6 PODE GERAR ERROS DE CONEXÃO COM O DISCORD
+// Força o uso de IPv4 nas conexões de rede.
 setGlobalDispatcher(
   new Agent({
     connect: {
       lookup(hostname, options, callback) {
-        dns.lookup(
-          hostname,
-          { ...options, family: 4 },
-          callback
-        );
+        dns.lookup(hostname, { ...options, family: 4 }, callback);
       },
     },
-  })
+  }),
 );
 
-bot.on("clientReady", async () => {
-  const channelLogs = await bot.channels.fetch("1032778034811506738");
-
-  changeStatus(bot);
-  setInterval(() => {
-    changeStatus(bot);
-  }, 60000);
-  // sendLogsEmbed(
-  //   channelLogs,
-  //   "**__🖥️MENSAGEM DO SERVIDOR🖥️:__**",
-  //   info,
-  //   16753920,
-  //   "",
-  //   ""
-  // );
-
-  console.log("Usuários:" + getUsersCount(bot));
-  console.log("Canais:" + getChannelsCount(bot));
-  console.log("Servidores:" + getGuildsCount(bot));
-});
-
+// Inicializa os comandos padrão e o despacho centralizado
+// dos componentes da biblioteca.
 initializeDefaultCommands(bot);
 
+bot.once("clientReady", async () => {
+  try {
+    await bot.channels.fetch("1032778034811506738");
+
+    changeStatus(bot);
+
+    setInterval(() => {
+      changeStatus(bot);
+    }, 60000);
+
+    console.log("Usuários: " + getUsersCount(bot));
+    console.log("Canais: " + getChannelsCount(bot));
+    console.log("Servidores: " + getGuildsCount(bot));
+  } catch (error) {
+    console.error("Erro ao inicializar o status e os logs:", error);
+  }
+});
+
+// Listener dos comandos personalizados do cliente.
 bot.on("interactionCreate", async (interaction) => {
   try {
-    // O erro "O aplicativo não respondeu" no Discord ocorre porque o bot tem um prazo de 3 segundos para responder a uma interação de comando de barra (slash command). Se o código demorar mais do que isso ou travar, o Discord cancela a interação
-    // Solução: Use a função de adiamento da resposta logo no início do comando para avisar o Discord que o bot está processando:
-    await interaction.deferReply();
-    if (interaction.isButton()) {
-      await handleTicketButtons(interaction);
-      return;
-    }
-
     if (!interaction.isChatInputCommand()) return;
-
-    // const interactionSummary = getInteractionSummary(interaction);
-    // console.log(interactionSummary);
 
     if (await validateInteractionChannel(interaction)) return;
     if (await verifyManageMessagesInInteraction(interaction)) return;
@@ -132,14 +129,17 @@ async function main() {
       console.error("Error: TOKEN or CLIENT_ID not defined in .env");
       return;
     }
+
     await commandsSYNC(commands);
     await bot.login(token);
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    console.error(error);
+
     setTimeout(() => {
       console.log("restarting...");
       main();
-    }, 1000 * 20);
+    }, 20000);
   }
 }
+
 await main();

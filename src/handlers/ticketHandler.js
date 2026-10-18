@@ -1,3 +1,5 @@
+// handlers/ticketHandler.js
+
 import {
   ActionRowBuilder,
   AttachmentBuilder,
@@ -6,6 +8,7 @@ import {
   ChannelType,
   MessageFlags,
 } from "discord.js";
+
 import {
   setEmbed,
   createTicketChannelFromInteraction,
@@ -13,21 +16,25 @@ import {
   closeTicket,
   parseTicketCreateCustomId,
   parseTicketCloseCustomId,
+  registerButtonHandler,
   fwrite,
 } from "npm-package-nodejs-utils-lda";
-import { existsSync, mkdirSync } from "fs";
-import path from "path";
 
-const TICKET_TRANSCRIPT_DIR = path.join(process.cwd(), "logs", "tickets");
+import { existsSync, mkdirSync } from "node:fs";
+import path from "node:path";
+
+const TICKET_TRANSCRIPT_DIR = path.join(
+  process.cwd(),
+  "logs",
+  "tickets",
+);
 
 function ensureTranscriptFolder() {
-  if (!existsSync(TICKET_TRANSCRIPT_DIR)) {
-    mkdirSync(TICKET_TRANSCRIPT_DIR, { recursive: true });
-  }
+  mkdirSync(TICKET_TRANSCRIPT_DIR, { recursive: true });
 }
 
 function escapeHtml(value) {
-  return String(value)
+  return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -36,74 +43,123 @@ function escapeHtml(value) {
 }
 
 function isImageUrl(url) {
-  return /(\.png|\.jpe?g|\.gif|\.webp|\.svg|\.bmp)(\?.*)?$/i.test(url);
+  return /\.(png|jpe?g|gif|webp|svg|bmp)(\?.*)?$/i.test(url);
 }
 
 async function saveTicketTranscript(channel, interaction) {
-  if (!channel || !channel.isTextBased()) return null;
+  if (!channel?.isTextBased() || !channel.messages) {
+    return null;
+  }
 
   ensureTranscriptFolder();
 
   try {
-    const messagesCollection = await channel.messages.fetch({ limit: 100 });
+    const messagesCollection = await channel.messages.fetch({
+      limit: 100,
+    });
+
     const messages = [...messagesCollection.values()].sort(
       (a, b) => a.createdTimestamp - b.createdTimestamp,
     );
 
     const now = new Date();
-    const header = `Ticket: ${channel.name}\nCanal: ${channel.id}\nCriado por: ${interaction.user.tag}\nFechado em: ${now.toLocaleString("pt-BR")}\nMensagens: ${messages.length}\n\n`;
+    const closedAt = now.toLocaleString("pt-BR");
+    const creator = interaction.user?.tag ?? interaction.user?.username ?? "Desconhecido";
+
+    const header = [
+      `Ticket: ${channel.name}`,
+      `Canal: ${channel.id}`,
+      `Fechado por: ${creator}`,
+      `Fechado em: ${closedAt}`,
+      `Mensagens: ${messages.length}`,
+      "",
+      "",
+    ].join("\n");
 
     const lines = messages.map((message) => {
       const time = new Date(message.createdTimestamp).toLocaleString("pt-BR");
-      const author = message.author.tag;
+      const author = message.author?.tag ?? "Desconhecido";
       const content = message.content || "";
+
       const attachments = message.attachments.size
         ? ` [Anexos: ${message.attachments.map((a) => a.url).join(", ")}]`
         : "";
+
       return `[${time}] ${author}: ${content}${attachments}`;
     });
 
     const htmlMessages = messages.map((message) => {
       const time = new Date(message.createdTimestamp).toLocaleString("pt-BR");
+
       const authorName = escapeHtml(
-        message.member?.displayName || message.author.username,
+        message.member?.displayName ||
+          message.author?.globalName ||
+          message.author?.username ||
+          "Desconhecido",
       );
-      const authorTag = escapeHtml(message.author.tag);
+
+      const authorTag = escapeHtml(
+        message.author?.tag ?? message.author?.username ?? "Desconhecido",
+      );
+
       const avatar = escapeHtml(
-        message.author.displayAvatarURL({ size: 128, extension: "png" }),
+        message.author?.displayAvatarURL({
+          size: 128,
+          extension: "png",
+        }) ?? "",
       );
+
       const content = escapeHtml(message.content || "");
-      const attachments = message.attachments.map((attachment) => {
-        const url = escapeHtml(attachment.url);
-        if (isImageUrl(attachment.url)) {
-          return `<div class=\"attachment\"><a href=\"${url}\" target=\"_blank\">${escapeHtml(attachment.name || attachment.url)}</a><br><img src=\"${url}\" alt=\"${escapeHtml(attachment.name || "imagem")}\" /></div>`;
-        }
-        return `<div class=\"attachment\"><a href=\"${url}\" target=\"_blank\">${escapeHtml(attachment.name || attachment.url)}</a></div>`;
-      });
+
+      const attachments = [...message.attachments.values()]
+        .map((attachment) => {
+          const url = escapeHtml(attachment.url);
+          const name = escapeHtml(attachment.name || attachment.url);
+
+          if (isImageUrl(attachment.url)) {
+            return `
+              <div class="attachment">
+                <a href="${url}" target="_blank" rel="noopener noreferrer">${name}</a>
+                <br>
+                <img src="${url}" alt="${escapeHtml(attachment.name || "imagem")}" />
+              </div>
+            `;
+          }
+
+          return `
+            <div class="attachment">
+              <a href="${url}" target="_blank" rel="noopener noreferrer">${name}</a>
+            </div>
+          `;
+        })
+        .join("");
 
       return `
-        <div class=\"message\">
-          <div class=\"meta\">
-            <img class=\"avatar\" src=\"${avatar}\" alt=\"${authorName}\" />
-            <div class=\"author-info\">
-              <div class=\"author\">${authorName}</div>
-              <div class=\"author-tag\">${authorTag}</div>
-              <div class=\"timestamp\">${escapeHtml(time)}</div>
+        <div class="message">
+          <div class="meta">
+            <img class="avatar" src="${avatar}" alt="${authorName}" />
+            <div class="author-info">
+              <div class="author">${authorName}</div>
+              <div class="author-tag">${authorTag}</div>
+              <div class="timestamp">${escapeHtml(time)}</div>
             </div>
           </div>
-          <div class=\"content\">${content || "<em>Sem texto</em>"}</div>
-          ${attachments.length ? attachments.join("") : ""}
+          <div class="content">${content || "<em>Sem texto</em>"}</div>
+          ${attachments}
         </div>
       `;
     });
 
+    const safeChannelName = channel.name.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
+
     const transcriptPathTxt = path.join(
       TICKET_TRANSCRIPT_DIR,
-      `${channel.name}-${channel.id}.txt`,
+      `${safeChannelName}-${channel.id}.txt`,
     );
+
     const transcriptPathHtml = path.join(
       TICKET_TRANSCRIPT_DIR,
-      `${channel.name}-${channel.id}.html`,
+      `${safeChannelName}-${channel.id}.html`,
     );
 
     const htmlContent = `<!DOCTYPE html>
@@ -113,22 +169,57 @@ async function saveTicketTranscript(channel, interaction) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Transcrição de ${escapeHtml(channel.name)}</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
-    .container { max-width: 900px; margin: 0 auto; background: #111827; border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(15,23,42,.35); }
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #111827;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(15,23,42,.35);
+    }
     .header { margin-bottom: 24px; }
     .header h1 { margin: 0 0 12px; font-size: 28px; }
     .header p { margin: 4px 0; color: #94a3b8; }
-    .message { border-top: 1px solid rgba(148,163,184,.12); padding: 18px 0; }
+    .message {
+      border-top: 1px solid rgba(148,163,184,.12);
+      padding: 18px 0;
+    }
     .message:first-child { border-top: none; }
-    .meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #2563eb; }
-    .author-info { display: flex; flex-direction: column; gap: 2px; }
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #2563eb;
+    }
+    .author-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
     .author { color: #60a5fa; font-weight: 700; font-size: 16px; }
     .author-tag { color: #94a3b8; font-size: 13px; }
     .timestamp { color: #cbd5e1; font-size: 13px; }
     .content { white-space: pre-wrap; line-height: 1.65; }
     .attachment { margin-top: 12px; }
-    .attachment img { max-width: 100%; border-radius: 12px; margin-top: 8px; }
+    .attachment img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
     a { color: #7dd3fc; text-decoration: none; }
   </style>
 </head>
@@ -137,8 +228,8 @@ async function saveTicketTranscript(channel, interaction) {
     <div class="header">
       <h1>Transcrição do Ticket ${escapeHtml(channel.name)}</h1>
       <p>Canal: ${escapeHtml(channel.id)}</p>
-      <p>Criado por: ${escapeHtml(interaction.user.tag)}</p>
-      <p>Fechado em: ${escapeHtml(now.toLocaleString("pt-BR"))}</p>
+      <p>Fechado por: ${escapeHtml(creator)}</p>
+      <p>Fechado em: ${escapeHtml(closedAt)}</p>
       <p>Total de mensagens: ${messages.length}</p>
     </div>
     ${htmlMessages.join("\n")}
@@ -148,52 +239,98 @@ async function saveTicketTranscript(channel, interaction) {
 
     await fwrite(transcriptPathTxt, header + lines.join("\n"));
     await fwrite(transcriptPathHtml, htmlContent);
-    return { transcriptPathTxt, transcriptPathHtml };
-  } catch (err) {
-    console.error("[saveTicketTranscript]:", err);
+
+    return {
+      transcriptPathTxt,
+      transcriptPathHtml,
+    };
+  } catch (error) {
+    console.error("[ticketHandler] Erro ao gerar transcrição:", error);
     return null;
   }
 }
 
-async function sendTranscriptToLogChannel(interaction, transcriptData, logChannelId) {
-  const channelId = logChannelId || process.env.TICKET_LOG_CHANNEL_ID;
-  if (!channelId || !transcriptData) return;
+async function sendTranscriptToLogChannel(
+  interaction,
+  transcriptData,
+  logChannelId,
+) {
+  const channelId =
+    logChannelId || process.env.TICKET_LOG_CHANNEL_ID;
+
+  if (!channelId || !transcriptData) {
+    return;
+  }
 
   const logChannel = await interaction.client.channels
     .fetch(channelId)
-    .catch(() => null);
-  if (!logChannel?.isTextBased()) return;
+    .catch((error) => {
+      console.error("[ticketHandler] Erro ao localizar canal de logs:", error);
+      return null;
+    });
+
+  if (!logChannel?.isTextBased() || typeof logChannel.send !== "function") {
+    console.warn("[ticketHandler] Canal de logs inválido ou indisponível.");
+    return;
+  }
 
   const attachments = [];
-  if (transcriptData.transcriptPathTxt) {
-    attachments.push(new AttachmentBuilder(transcriptData.transcriptPathTxt, {
-      name: path.basename(transcriptData.transcriptPathTxt),
-    }));
+
+  if (existsSync(transcriptData.transcriptPathTxt)) {
+    attachments.push(
+      new AttachmentBuilder(transcriptData.transcriptPathTxt, {
+        name: path.basename(transcriptData.transcriptPathTxt),
+      }),
+    );
   }
-  if (transcriptData.transcriptPathHtml) {
-    attachments.push(new AttachmentBuilder(transcriptData.transcriptPathHtml, {
-      name: path.basename(transcriptData.transcriptPathHtml),
-    }));
+
+  if (existsSync(transcriptData.transcriptPathHtml)) {
+    attachments.push(
+      new AttachmentBuilder(transcriptData.transcriptPathHtml, {
+        name: path.basename(transcriptData.transcriptPathHtml),
+      }),
+    );
   }
-  if (!attachments.length) return;
+
+  if (!attachments.length) {
+    return;
+  }
 
   await logChannel.send({
-    content: `🧾 Transcrição do ticket fechado: **${interaction.channel?.name || "sem nome"}**`,
+    content: `Transcrição do ticket fechado: **${interaction.channel?.name || "sem nome"}**`,
     files: attachments,
   });
 }
 
+async function replyEphemeral(interaction, content) {
+  if (interaction.deferred) {
+    return interaction.editReply({ content });
+  }
+
+  if (interaction.replied) {
+    return interaction.followUp({
+      content,
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  return interaction.reply({
+    content,
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
 /**
- * Handler de botões do sistema de ticket
- * @param {import("discord.js").Interaction} interaction
+ * Handler de botões do sistema de tickets.
+ * @param {import("discord.js").ButtonInteraction} interaction
  */
 async function handleTicketButtons(interaction) {
-  if (!interaction.isButton()) return;
+  if (!interaction.isButton()) {
+    return;
+  }
 
-  // =========================
-  // CRIAR TICKET (CLASSIFICADO)
-  // =========================
-  if (interaction.customId.startsWith("create_ticket")) {
+  // CRIAR TICKET
+  if (interaction.customId.startsWith("create_ticket:")) {
     const {
       ticketType,
       categoryId,
@@ -202,22 +339,19 @@ async function handleTicketButtons(interaction) {
     } = parseTicketCreateCustomId(interaction.customId);
 
     if (!interaction.deferred && !interaction.replied) {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     if (categoryId) {
       const category = interaction.guild?.channels.cache.get(categoryId);
+
       if (!category || category.type !== ChannelType.GuildCategory) {
-        if (interaction.deferred || interaction.replied) {
-          await interaction.editReply({
-            content: "Categoria inválida para tickets. Use uma categoria válida.",
-          });
-        } else {
-          await interaction.reply({
-            content: "Categoria inválida para tickets. Use uma categoria válida.",
-            flags: MessageFlags.Ephemeral,
-          });
-        }
+        await replyEphemeral(
+          interaction,
+          "Categoria inválida para tickets. Selecione uma categoria válida.",
+        );
         return;
       }
     }
@@ -229,18 +363,23 @@ async function handleTicketButtons(interaction) {
     });
 
     if (!channel) {
-      if (!interaction.replied && interaction.deferred) {
-        await interaction.editReply({
-          content: "Não foi possível abrir o ticket. Tente novamente mais tarde.",
-        });
-      }
+      await replyEphemeral(
+        interaction,
+        "Não foi possível abrir o ticket. Verifique as permissões do bot e tente novamente.",
+      );
       return;
     }
 
-    const staffTopic = await createStaffDiscussionThread(channel, staffRoleId);
+    let staffTopic = null;
+
+    try {
+      staffTopic = await createStaffDiscussionThread(channel, staffRoleId);
+    } catch (error) {
+      console.error("[ticketHandler] Erro ao criar tópico da equipe:", error);
+    }
 
     const embed = setEmbed(
-      `🎫 Ticket ${ticketType.charAt(0).toUpperCase() + ticketType.slice(1)} Aberto`,
+      `Ticket ${ticketType.charAt(0).toUpperCase() + ticketType.slice(1)} Aberto`,
       "Obrigado por abrir um ticket. Nossa equipe de suporte irá responder o mais rápido possível.",
       0x00ff00,
       "Aguardando atendimento",
@@ -260,67 +399,119 @@ async function handleTicketButtons(interaction) {
       },
       {
         name: "Instruções",
-        value: "Por favor, descreva seu problema com detalhes e adicione capturas de tela quando necessário.",
+        value: "Descreva seu problema com detalhes e adicione capturas de tela quando necessário.",
         inline: false,
       },
       {
         name: "Importante",
-        value: "Esta conversa será registrada e arquivada como transcrição após o fechamento. A equipe de suporte tem um tópico privado para discussão.",
+        value: "Esta conversa poderá ser registrada em uma transcrição após o fechamento.",
         inline: false,
       },
     ];
 
+    const closeCustomId =
+      `close_ticket:${ticketType}:${logChannelId || "none"}`;
+
+    // Registra o customId exato no dispatcher do pacote.
+    registerButtonHandler(
+      closeCustomId,
+      handleTicketButtons,
+      { replace: true },
+    );
+
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`close_ticket:${ticketType}:${logChannelId || "none"}`)
+        .setCustomId(closeCustomId)
         .setLabel("Fechar Ticket")
         .setStyle(ButtonStyle.Danger),
     );
 
     const staffMessage = staffTopic
-      ? `\n\n🔒 **Tópico de Staff:** ${staffTopic}`
+      ? `\n\nTópico privado da equipe: ${staffTopic}`
       : "";
 
-    await channel.send({
-      content: `<@${interaction.user.id}>${staffMessage}`,
-      embeds: [embed],
-      components: [row],
-    });
-
-    if (interaction.deferred || interaction.replied) {
-      await interaction.editReply({
-        content: `✅ Ticket criado: ${channel}\n**Classificação:** ${ticketType.toUpperCase()}`,
+    try {
+      await channel.send({
+        content: `<@${interaction.user.id}>${staffMessage}`,
+        embeds: [embed],
+        components: [row],
       });
-    } else {
-      await interaction.reply({
-        content: `✅ Ticket criado: ${channel}\n**Classificação:** ${ticketType.toUpperCase()}`,
+    } catch (error) {
+      console.error("[ticketHandler] Erro ao enviar painel do ticket:", error);
+
+      await replyEphemeral(
+        interaction,
+        `O canal ${channel} foi criado, mas não consegui enviar a mensagem inicial. Verifique as permissões do bot.`,
+      );
+      return;
+    }
+
+    await replyEphemeral(
+      interaction,
+      `Ticket criado: ${channel}\nClassificação: **${ticketType.toUpperCase()}**`,
+    );
+
+    return;
+  }
+
+  // FECHAR TICKET
+  if (interaction.customId.startsWith("close_ticket:")) {
+    // Responde imediatamente para evitar que a interação expire.
+    if (!interaction.deferred && !interaction.replied) {
+      await interaction.deferReply({
         flags: MessageFlags.Ephemeral,
       });
     }
-  }
 
-  // =========================
-  // FECHAR TICKET
-  // =========================
-  if (interaction.customId.startsWith("close_ticket")) {
-    try {
-      const { ticketType, logChannelId: closeLogChannelId } = parseTicketCloseCustomId(
-        interaction.customId,
+    const { logChannelId } = parseTicketCloseCustomId(
+      interaction.customId,
+    );
+
+    const channel = interaction.channel;
+
+    if (!channel || !channel.isTextBased()) {
+      await replyEphemeral(
+        interaction,
+        "Não foi possível identificar o canal deste ticket.",
       );
+      return;
+    }
 
-      const transcriptData = await saveTicketTranscript(interaction.channel, interaction);
-      await sendTranscriptToLogChannel(interaction, transcriptData, closeLogChannelId);
+    // A transcrição não deve impedir o fechamento.
+    let transcriptData = null;
+
+    try {
+      transcriptData = await saveTicketTranscript(channel, interaction);
+    } catch (error) {
+      console.error("[ticketHandler] Falha na transcrição:", error);
+    }
+
+    try {
+      await sendTranscriptToLogChannel(
+        interaction,
+        transcriptData,
+        logChannelId,
+      );
+    } catch (error) {
+      console.error("[ticketHandler] Falha ao enviar a transcrição:", error);
+    }
+
+    // closeTicket agenda a exclusão e tenta responder à interação.
+    try {
       await closeTicket(interaction);
     } catch (error) {
-      console.error(error);
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({
-          content: "Erro ao fechar o ticket. Tente novamente mais tarde.",
-          flags: MessageFlags.Ephemeral,
-        });
-      }
+      console.error("[ticketHandler] Erro ao fechar ticket:", error);
+
+      await replyEphemeral(
+        interaction,
+        "Não foi possível fechar o ticket. Verifique as permissões do bot.",
+      );
     }
+
+    return;
   }
 }
 
+// Registra o handler geral para IDs de fechamento criados por este módulo.
+// O dispatcher precisa encaminhar os IDs registrados para handleButton.
 export { handleTicketButtons };

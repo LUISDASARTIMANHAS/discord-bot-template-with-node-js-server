@@ -1,68 +1,73 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ChannelType,
-} from "discord.js";
-import { buildTicketCreateCustomId, createField, setEmbed } from "npm-package-nodejs-utils-lda";
+// comandos/ticket.js
 
-// Definição das classificações de tickets
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChannelType, ButtonStyle } from "discord.js";
+
+import {
+    buildTicketCreateCustomId,
+    createContainer,
+    createText,
+    createSeparator,
+    createContainerMessage,
+    createButton,
+    createButtonRow,
+    registerButtonHandler,
+} from "npm-package-nodejs-utils-lda";
+
+import { handleTicketButtons } from "../handlers/ticketHandler.js";
+
+// Classificações disponíveis.
 const TICKET_TYPES = {
-  geral: {
-    label: "📋 Geral",
-    emoji: "📋",
-    color: 0x00aeff,
-  },
-  bug: {
-    label: "🐛 Bug",
-    emoji: "🐛",
-    color: 0xff0000,
-  },
-  suport: {
-    label: "🆘 Suporte",
-    emoji: "🆘",
-    color: 0x00ff00,
-  },
-  denuncia: {
-    label: "⚠️ Denúncia",
-    emoji: "⚠️",
-    color: 0xff8800,
-  },
-  solicitacao: {
-    label: "📝 Solicitação",
-    emoji: "📝",
-    color: 0x00ccff,
-  },
+    geral: {
+        label: "📋 Geral",
+        style: ButtonStyle.Primary,
+    },
+    bug: {
+        label: "🐛 Bug",
+        style: ButtonStyle.Danger,
+    },
+    suport: {
+        label: "🆘 Suporte",
+        style: ButtonStyle.Success,
+    },
+    denuncia: {
+        label: "⚠️ Denúncia",
+        style: ButtonStyle.Secondary,
+    },
+    solicitacao: {
+        label: "📝 Solicitação",
+        style: ButtonStyle.Secondary,
+    },
 };
 
-let ticketCommand = new SlashCommandBuilder()
-  .setName("ticket")
-  .setDescription("Cria painel de tickets profissional com classificações")
-  .addChannelOption((option) =>
-    option
-      .setName("categoria")
-      .setDescription("Categoria onde os tickets serão criados")
-      .addChannelTypes(ChannelType.GuildCategory)
-      .setRequired(false),
-  )
-  .addRoleOption((option) =>
-    option
-      .setName("cargo_suporte")
-      .setDescription("Cargo que terá acesso aos tickets e tópicos privados")
-      .setRequired(false),
-  )
-  .addChannelOption((option) =>
-    option
-      .setName("log_channel")
-      .setDescription("Canal para enviar a transcrição do ticket")
-      .addChannelTypes(ChannelType.GuildText)
-      .setRequired(false),
-  );
-
-ticketCommand = ticketCommand.toJSON();
+const ticketCommand = new SlashCommandBuilder()
+    .setName("ticket")
+    .setDescription("Cria um painel profissional de tickets")
+    .addChannelOption((option) =>
+        option
+            .setName("categoria")
+            .setDescription("Categoria onde os tickets serão criados")
+            .addChannelTypes(ChannelType.GuildCategory)
+            .setRequired(false),
+    )
+    .addRoleOption((option) =>
+        option
+            .setName("cargo_suporte")
+            .setDescription("Cargo que terá acesso aos tickets")
+            .setRequired(false),
+    )
+    .addChannelOption((option) =>
+        option
+            .setName("log_channel")
+            .setDescription("Canal para enviar a transcrição dos tickets")
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(false),
+    )
+    .toJSON();
 
 /**
+ * Cria o painel de tickets com Discord Components V2.
+ *
  * @param {import("discord.js").ChatInputCommandInteraction} interaction
  */
 async function handleTicket(interaction) {
@@ -72,79 +77,112 @@ async function handleTicket(interaction) {
   const cargo = interaction.options.getRole("cargo_suporte");
   const logChannel = interaction.options.getChannel("log_channel");
 
-  const categoriaTexto = categoria ? categoria.name : "Sem categoria definida";
-  const suporteTexto = cargo ? `<@&${cargo.id}>` : "Sem cargo configurado";
-  const logChannelTexto = logChannel
+  const categoriaId = categoria?.id ?? "none";
+  const cargoId = cargo?.id ?? "none";
+  const logChannelId = logChannel?.id ?? "none";
+
+  const categoriaTexto = categoria
+    ? `<#${categoria.id}>`
+    : "Não configurada";
+
+  const suporteTexto = cargo
+    ? `<@&${cargo.id}>`
+    : "Não configurado";
+
+  const logTexto = logChannel
     ? `<#${logChannel.id}>`
-    : "Sem canal de transcrição definido";
+    : "Não configurado";
 
-  const embed = setEmbed(
-    "🎫 Painel de Tickets Classificados",
-    "Abra um ticket de acordo com sua classificação. Todas as conversas são registradas e arquivadas automaticamente. Será criado um tópico privado para a equipe de suporte discutir sobre o ticket.",
-    0x00aeff,
-    "Suporte",
-    "",
-    [
-      createField(
-        "Como funciona",
-        "1️⃣ Clique no botão da sua classificação\n2️⃣ Descreva seu problema com detalhes\n3️⃣ Um tópico privado será criado para a staff discutir\n4️⃣ Aguarde nosso atendimento",
-      ),
-      createField("Categoria", categoriaTexto, true),
-      createField("Cargo de suporte", suporteTexto, true),
-      createField(
-        "Classificações disponíveis",
-        "📋 **Geral** - Dúvidas gerais\n🐛 **Bug** - Reportar erros\n🆘 **Suporte** - Ajuda técnica\n⚠️ **Denúncia** - Reportar pessoas/staff\n📝 **Solicitação** - Solicitações especiais",
-        false,
-      ),
-      createField(
-        "Boas práticas",
-        "Escolha a classificação correta, explique com detalhes, inclua prints quando necessário e não feche o ticket antes da confirmação.",
-        false,
-      ),
-    ],
+  // Monta os botões e registra seus handlers pelos customIds exatos.
+  const buttons = Object.entries(TICKET_TYPES).map(
+    ([type, ticket]) => {
+      const customId = buildTicketCreateCustomId(
+        type,
+        categoriaId,
+        cargoId,
+        logChannelId,
+      );
+
+      registerButtonHandler(customId, handleTicketButtons);
+
+      return createButton({
+        customId,
+        label: ticket.label,
+        style: ticket.style,
+      });
+    },
   );
 
-  // Criar múltiplas linhas de botões (3 na primeira, 2 na segunda)
-  const row1 = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(
-        buildTicketCreateCustomId("geral", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
-      )
-      .setLabel("📋 Geral")
-      .setStyle(ButtonStyle.Primary),
-    new ButtonBuilder()
-      .setCustomId(
-        buildTicketCreateCustomId("bug", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
-      )
-      .setLabel("🐛 Bug")
-      .setStyle(ButtonStyle.Danger),
-    new ButtonBuilder()
-      .setCustomId(
-        buildTicketCreateCustomId("suport", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
-      )
-      .setLabel("🆘 Suporte")
-      .setStyle(ButtonStyle.Success),
-  );
-
-  const row2 = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(
-        buildTicketCreateCustomId("denuncia", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
-      )
-      .setLabel("⚠️ Denúncia")
-      .setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder()
-      .setCustomId(
-        buildTicketCreateCustomId("solicitacao", categoria?.id || "none", cargo?.id || "none", logChannel?.id || "none"),
-      )
-      .setLabel("📝 Solicitação")
-      .setStyle(ButtonStyle.Secondary),
-  );
-
-  await interaction.editReply({
-    embeds: [embed],
-    components: [row1, row2],
+  // Container principal.
+  const container = createContainer({
+    colorHex: 0x00aeff,
   });
+
+  container.addTextDisplayComponents(
+    createText("# 🎫 Central de Atendimento"),
+    createText(
+      "Precisa de ajuda? Escolha abaixo a classificação que melhor corresponde à sua necessidade para abrir um ticket.",
+    ),
+  );
+
+  container.addSeparatorComponents(createSeparator());
+
+  container.addTextDisplayComponents(
+    createText(
+      "### Como funciona\n" +
+      "1. Selecione uma classificação.\n" +
+      "2. Informe os detalhes do seu problema.\n" +
+      "3. A equipe de suporte analisará sua solicitação.\n" +
+      "4. Aguarde o atendimento no canal criado para você.",
+    ),
+  );
+
+  container.addSeparatorComponents(createSeparator());
+
+  container.addTextDisplayComponents(
+    createText(
+      "### Classificações\n" +
+      "📋 **Geral** — dúvidas e informações.\n" +
+      "🐛 **Bug** — reporte erros e falhas.\n" +
+      "🆘 **Suporte** — ajuda técnica.\n" +
+      "⚠️ **Denúncia** — reporte ocorrências.\n" +
+      "📝 **Solicitação** — pedidos e sugestões.",
+    ),
+  );
+
+  container.addSeparatorComponents(createSeparator());
+
+  container.addTextDisplayComponents(
+    createText(
+      "### Configuração do painel\n" +
+      `**Categoria:** ${categoriaTexto}\n` +
+      `**Equipe:** ${suporteTexto}\n` +
+      `**Canal de logs:** ${logTexto}`,
+    ),
+  );
+
+  container.addSeparatorComponents(createSeparator());
+
+  container.addTextDisplayComponents(
+    createText(
+      "Escolha uma das opções abaixo para começar. Forneça informações claras e, quando necessário, inclua evidências para ajudar a equipe.",
+    ),
+  );
+
+  // Os componentes interativos são organizados em Action Rows.
+  container.addActionRowComponents(
+    createButtonRow(buttons.slice(0, 3)),
+    createButtonRow(buttons.slice(3, 5)),
+  );
+
+  // Responde ao comando com Components V2.
+  const message = createContainerMessage([container]);
+
+  if (interaction.deferred || interaction.replied) {
+    await interaction.editReply(message);
+  } else {
+    await interaction.reply(message);
+  }
 }
 
 export { ticketCommand, handleTicket, TICKET_TYPES };
