@@ -16,8 +16,10 @@ set "id=%random%"
 set "log=%~dp0logs\%id%-WINDOWS-SERVER-%COMPUTERNAME%.txt"
 
 title=%id%-WINDOWS-SERVER-%COMPUTERNAME%
+echo %cd%
 
-@rem Executa o servidor e grava a saida no arquivo
-start "" /high /D "%~dp0" cmd /k "npm run start >> ""%log%"" 2>&1"
+@rem Executa o servidor
+@rem A saida e gravada no arquivo de log
+npm run start >> "%log%" 2>&1
 
 endlocal
